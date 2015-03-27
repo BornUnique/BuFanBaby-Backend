@@ -87,4 +87,8 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
 4.customized security http header
 
-5.compress respnse
+5.compress response
+
+6. 
+
+Spring Security relies on Spring’s localization support in order to actually lookup the appropriate message. In order for this to work, you have to make sure that the locale from the incoming request is stored in Spring’s org.springframework.context.i18n.LocaleContextHolder. Spring MVC’s DispatcherServlet does this for your application automatically, but since Spring Security’s filters are invoked before this, the LocaleContextHolder needs to be set up to contain the correct Locale before the filters are called. You can either do this in a filter yourself (which must come before the Spring Security filters in`web.xml`) or you can use Spring’s RequestContextFilter. Please refer to the Spring Framework documentation for further details on using localization with Spring.The "contacts" sample application is set up to use localized messages.
