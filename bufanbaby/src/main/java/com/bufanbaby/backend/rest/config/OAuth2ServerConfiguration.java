@@ -3,10 +3,7 @@ package com.bufanbaby.backend.rest.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -17,11 +14,9 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class OAuth2ServerConfiguration {
 
 	@Configuration
-	@EnableWebSecurity
 	@EnableResourceServer
 	protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
@@ -29,29 +24,11 @@ public class OAuth2ServerConfiguration {
 		public void configure(HttpSecurity http) throws Exception {
 			// @formatter:off
 			http
-				.requestMatchers().antMatchers("/me");
-			
-			  http
-			    .formLogin().disable()
-			    .logout().disable()
-			    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			    .and()
-		        .csrf().disable()
-		        .authorizeRequests()
-		        .antMatchers("/index.html", "/signup.html", "/about.html", "/terms.html").permitAll()
-		        .antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", "/reset_password.html","/validate.html" ).hasRole("USER")
-		        .antMatchers("/admin/**").hasRole("ADMIN");
-			
-//			  http
-//		        .authorizeRequests()
-//		        .antMatchers("/index.html", "/signup.html", "/about.html", "/terms.html").permitAll()
-//		        .antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", "/reset_password.html","/validate.html" ).hasRole("USER")
-//		        .antMatchers("/admin/**").hasRole("ADMIN")
-//		        .anyRequest().authenticated().and().formLogin().disable()
-//			    .logout().disable()
-//			    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//			    .and()
-//		        .csrf().disable();
+				.requestMatchers().antMatchers("/me")
+				.and()
+			        .authorizeRequests()
+			        .antMatchers("/me").hasRole("User")
+			     .and().logout().disable();
 			// @formatter:on
 		}
 	}
