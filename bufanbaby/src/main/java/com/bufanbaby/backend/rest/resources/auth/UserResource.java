@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.bufanbaby.backend.rest.domain.auth.User;
 import com.bufanbaby.backend.rest.services.auth.UserService;
@@ -51,7 +50,6 @@ public class UserResource {
 	@Autowired
 	private UserService userService;
 
-	@PreAuthorize("isAnonymous()")
 	@POST
 	public Response signup(@Valid @NotNull SignUpRequest signUpRequest) {
 
