@@ -48,7 +48,7 @@
           return $('#error_message').html('You must agree to the terms of service.').show();
         }
 
-        oauth2.user.create($('#username').val(), $('#email').val(), $('#password').val(), '', function (error) {
+        oauth2.user.create($('#username').val(), $('#email').val(), $('#password').val(), $('#firstName').val(),$('#lastName').val(), function (error) {
           if (!error) {
             window.location = 'dashboard.html';
           } else {

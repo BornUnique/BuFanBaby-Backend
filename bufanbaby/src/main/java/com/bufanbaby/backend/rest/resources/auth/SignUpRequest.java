@@ -66,6 +66,6 @@ public class SignUpRequest {
 	public String toString() {
 		return String.format(
 				"SignUpRequest [firstName=%s, lastName=%s, username=%s, email=%s, password=%s]",
-				firstName, lastName, username, email, password);
+				firstName, lastName, username, email, "[PROTECTED]");
 	}
 }
