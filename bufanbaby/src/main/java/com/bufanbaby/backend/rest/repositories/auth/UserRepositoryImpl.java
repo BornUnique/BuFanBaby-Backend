@@ -14,6 +14,7 @@ import com.bufanbaby.backend.rest.domain.auth.User;
 import com.bufanbaby.backend.rest.repositories.RedisKeys;
 
 @Component
+// @Profile("default")
 public class UserRepositoryImpl implements UserRepository {
 
 	private final StringRedisTemplate template;
@@ -72,7 +73,8 @@ public class UserRepositoryImpl implements UserRepository {
 		// user:xinxin:uid -> 1
 		valueOps.set(RedisKeys.user(user.getUsername()), uid);
 
-		users.addFirst(user.getUsername());
+		// users -> {1, 2}
+		users.addFirst(uid);
 		return uid;
 	}
 

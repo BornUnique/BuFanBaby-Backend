@@ -47,8 +47,8 @@ public class ValidationException extends WebApplicationException {
 				.entity(getViolationResponse()).build();
 	}
 
-	public ErrorResponse getViolationResponse() {
-		ErrorResponse response = new ErrorResponse();
+	public ValidationErrorResponse getViolationResponse() {
+		ValidationErrorResponse response = new ValidationErrorResponse();
 		response.setApplicationMessage(developerMessage);
 		response.setConsumerMessage(errorMessage);
 		response.setViolations(violations);

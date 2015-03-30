@@ -5,13 +5,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @SuppressWarnings("serial")
-public abstract class BaseWebApplicationException extends WebApplicationException {
+public abstract class AbstractWebApplicationException extends WebApplicationException {
 
 	private final int status;
 	private final String errorMessage;
 	private final String developerMessage;
 
-	public BaseWebApplicationException(int httpStatus, String errorMessage, String developerMessage) {
+	public AbstractWebApplicationException(int httpStatus, String errorMessage, String developerMessage) {
 		this.status = httpStatus;
 		this.errorMessage = errorMessage;
 		this.developerMessage = developerMessage;

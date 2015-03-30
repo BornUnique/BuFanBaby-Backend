@@ -54,10 +54,11 @@ public class UserServiceImpl implements UserService {
 			Set<GrantedAuthority> authorities = new HashSet<>();
 			authorities.add(authority);
 			user.setAuthorities(authorities);
+
+			// TODO: what should be returned from redis repository
 			String userId = userRepository.add(user);
 			logger.info("Created new user [{}].", userId);
-
-			return null;
+			return user;
 		} else {
 			logger.info("Duplicate user located, exception raised with appropriate HTTP response code.");
 			throw new DuplicateUserException();

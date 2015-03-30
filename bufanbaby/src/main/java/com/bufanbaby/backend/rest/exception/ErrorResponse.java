@@ -1,13 +1,11 @@
 package com.bufanbaby.backend.rest.exception;
 
-import java.util.List;
 
 public class ErrorResponse {
 
 	private String errorCode;
 	private String consumerMessage;
 	private String applicationMessage;
-	private List<Violation> violations;
 
 	public ErrorResponse() {
 	}
@@ -40,13 +38,5 @@ public class ErrorResponse {
 
 	public void setApplicationMessage(String applicationMessage) {
 		this.applicationMessage = applicationMessage;
-	}
-
-	public List<Violation> getViolations() {
-		return violations;
-	}
-
-	public void setViolations(List<Violation> violations) {
-		this.violations = violations;
 	}
 }

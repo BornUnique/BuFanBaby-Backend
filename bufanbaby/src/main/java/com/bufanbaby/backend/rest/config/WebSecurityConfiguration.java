@@ -26,8 +26,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		// @formatter:off
 		  http
-		  		.httpBasic()
-		  	.and()
+		  		.httpBasic().disable()
 		    	.formLogin().disable()
 		    	.logout().disable()
 		    	.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -35,7 +34,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	        	.csrf().disable()
 	        .authorizeRequests()
 		        .antMatchers("/index.html", "/signup.html", "/about.html", "/terms.html", "/v1.0/users/**").anonymous()
-		        .antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", "/reset_password.html","/validate.html").hasRole("USER")
+		        .antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", "/reset_password.html","/validate.html").permitAll()
 		        .antMatchers("/admin/**").hasRole("ADMIN")
 		        .anyRequest().authenticated();
 	     // @formatter:on

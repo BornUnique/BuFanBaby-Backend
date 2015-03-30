@@ -1,5 +1,8 @@
 package com.bufanbaby.backend.rest.resources.auth;
 
+import java.net.URI;
+import java.util.UUID;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -39,7 +42,19 @@ public class UserResource extends AbstractResource {
 		logger.info("Validating user sign up request");
 		validate(signUpRequest);
 		User user = userService.create(signUpRequest);
-		return null;
+
+		SignUpResponse response = new SignUpResponse();
+		response.setUsername(user.getUsername());
+		response.setEmail(user.getEmail());
+		response.setFirstName(user.getFirstName());
+		response.setLastName(user.getLastName());
+
+		// TODO: currently bypass OAuth token generation
+		response.setAuthToken(UUID.randomUUID().toString());
+
+		URI location = uriInfo.getAbsolutePathBuilder()
+				.path(user.getUsername()).build();
+		return Response.created(location).entity(response).build();
 	}
 
 }
