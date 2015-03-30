@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.services;
+package com.bufanbaby.backend.rest.resources.auth;
 
 import java.util.Set;
 
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.bufanbaby.backend.rest.exception.ValidationException;
 
-public abstract class BaseService {
+public class AbstractResource {
 
 	@Autowired
 	private Validator validator;
@@ -20,4 +20,5 @@ public abstract class BaseService {
 			throw new ValidationException(constraintViolations);
 		}
 	}
+
 }

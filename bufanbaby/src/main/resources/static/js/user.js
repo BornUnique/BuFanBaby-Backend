@@ -9,16 +9,20 @@ oauth2.user = {}
  * @param {string}
  * @param {function}
  */
-oauth2.user.create = function(username, email, password, lastName,callback) {
+oauth2.user.create = function(username, email, password, firstName, lastName,callback) {
 	oauth2.postClientAuth('v1.0/users', 
 	{
 		"username" : username,
 		"email" : email,
-		"password" : password
+		"password" : password,
+		"firstName" : firstName,
+		"lastName" : lastName
 	}, function(response) {
-		oauth2.cookie.set('authToken', response.oauth2AccessToken.access_token)
-		oauth2.cookie.set('userId', response.apiUser.id)
-		oauth2.cookie.set('email', emailAddress)
+		oauth2.cookie.set('authToken', response.authToken)
+		oauth2.cookie.set('username', response.username)
+		oauth2.cookie.set('email', email)
+	    oauth2.cookie.set('firstName', response.firstName)
+		oauth2.cookie.set('lastName', response.lastName)
 		callback()
 	}, function(jqXHR, textStatus) {
 		console.log(jqXHR)
