@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,7 @@ import com.bufanbaby.backend.rest.resources.auth.SignUpRequest;
 import com.bufanbaby.backend.rest.services.auth.UserService;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	private final UserRepository userRepository;
@@ -63,5 +66,10 @@ public class UserServiceImpl implements UserService {
 			logger.info("Duplicate user located, exception raised with appropriate HTTP response code.");
 			throw new DuplicateUserException();
 		}
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		return null;
 	}
 }

@@ -7,13 +7,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
 @SuppressWarnings("serial")
-public class User implements UserDetails, CredentialsContainer {
+public class User implements UserDetails {
 
 	private String firstName;
 	private String lastName;
@@ -28,6 +27,12 @@ public class User implements UserDetails, CredentialsContainer {
 	private boolean verified = false;
 
 	private LocalDateTime birthday;
+
+	private LocalDateTime createdTime;
+
+	private LocalDateTime updatedTime;
+
+	private LocalDateTime lastVisitedTime;
 
 	private Gender gender = Gender.UNKNOWN;
 
@@ -128,11 +133,6 @@ public class User implements UserDetails, CredentialsContainer {
 		this.authorities = Collections.unmodifiableSet(sortAuthorities(authorities));
 	}
 
-	@Override
-	public void eraseCredentials() {
-		password = null;
-	}
-
 	public LocalDateTime getBirthday() {
 		return birthday;
 	}
@@ -147,6 +147,30 @@ public class User implements UserDetails, CredentialsContainer {
 
 	public void setGender(Gender gender) {
 		this.gender = gender;
+	}
+
+	public LocalDateTime getCreatedTime() {
+		return createdTime;
+	}
+
+	public void setCreatedTime(LocalDateTime createdTime) {
+		this.createdTime = createdTime;
+	}
+
+	public LocalDateTime getUpdatedTime() {
+		return updatedTime;
+	}
+
+	public void setUpdatedTime(LocalDateTime updatedTime) {
+		this.updatedTime = updatedTime;
+	}
+
+	public LocalDateTime getLastVisitedTime() {
+		return lastVisitedTime;
+	}
+
+	public void setLastVisitedTime(LocalDateTime lastVisitedTime) {
+		this.lastVisitedTime = lastVisitedTime;
 	}
 
 	/**

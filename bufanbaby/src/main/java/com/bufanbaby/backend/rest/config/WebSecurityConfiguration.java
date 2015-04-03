@@ -1,47 +1,57 @@
 package com.bufanbaby.backend.rest.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@EnableWebSecurity
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+//@Configuration
+//@EnableWebSecurity
+public class WebSecurityConfiguration {
 
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/css/**", "/js/**",
-				"/images/**", "/**/favicon.ico");
-	}
-
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		// @formatter:off
-		  http
-		  		.httpBasic().disable()
-		    	.formLogin().disable()
-		    	.logout().disable()
-		    	.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-		    .and()
-	        	.csrf().disable()
-	        .authorizeRequests()
-		        .antMatchers("/index.html", "/signup.html", "/about.html", "/terms.html", "/v1.0/users/**").anonymous()
-		        .antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", "/reset_password.html","/validate.html").permitAll()
-		        .antMatchers("/admin/**").hasRole("ADMIN")
-		        .anyRequest().authenticated();
-	     // @formatter:on
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+	// // @Autowired
+	// private UserDetailsService userDetailsService;
+	//
+	// @Override
+	// public void configure(WebSecurity web) throws Exception {
+	// web.ignoring().antMatchers("/css/**", "/js/**",
+	// "/images/**", "/**/favicon.ico");
+	// }
+	//
+	// @Override
+	// protected void configure(HttpSecurity http) throws Exception {
+	//
+//		// @formatter:off
+//		  http
+//		  		.httpBasic().disable()
+//		    	.formLogin().disable()
+//		    	.logout().disable()
+//		    	.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//		    .and()
+//	        	.csrf().disable()
+//	        .authorizeRequests()
+//		        .antMatchers("/index.html", "/signup.html", "/about.html", "/terms.html", "/v1.0/users/**").anonymous()
+//		        .antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", "/reset_password.html","/validate.html").permitAll()
+//		        .antMatchers("/admin/**").hasRole("ADMIN")
+//		        .anyRequest().authenticated();
+//	     // @formatter:on
+	// }
+	//
+	// @Override
+	// protected void configure(AuthenticationManagerBuilder auth) throws
+	// Exception {
+	// }
+	//
+	// // @Bean
+	// public PasswordEncoder passwordEncoder() {
+	// return new BCryptPasswordEncoder();
+	// }
+	//
+	// // @Bean
+	// public AuthenticationManager userAuthenticationManager() {
+	// DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+	// provider.setPasswordEncoder(passwordEncoder());
+	// provider.setUserDetailsService(userDetailsService);
+	// List<AuthenticationProvider> providers = new
+	// ArrayList<AuthenticationProvider>();
+	// providers.add(provider);
+	// AuthenticationManager am = new ProviderManager(providers);
+	// return am;
+	// }
 }
