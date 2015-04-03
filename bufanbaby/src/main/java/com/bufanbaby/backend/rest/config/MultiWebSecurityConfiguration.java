@@ -29,14 +29,22 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 public class MultiWebSecurityConfiguration {
 
 	@Autowired
+	private AuthenticationManager userAuthenticationManager;
+
+	@Autowired
 	private UserDetailsService userServiceImpl;
 
 	@Autowired
 	UserDetailsService clientDetailsUserDetailsService;
 
+	@Autowired
+	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+		auth.parentAuthenticationManager(userAuthenticationManager);
+	}
+
 	@Configuration
 	@Order(1)
-	public static class UsersWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+	public static class SignUpWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		@Autowired
 		private AuthenticationManager clientAuthenticationManager;
@@ -55,30 +63,14 @@ public class MultiWebSecurityConfiguration {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			// "/index.html", "/signup.html":
-			// anonymous() (request) -> security headers (response)
-
-			// "/dashboard.html","/forgot_password.html", "/request_email.html",
-			// "/reset_password.html","/validate.html"
-			// Bearer (request) + hasRole("USER") -> security headers (response)
-
-			// Protected REST APIs: "/me", "/v1.0/**"
-			// Bearer (request) + hasRole("USER") -> security headers (response)
-
 			// "/v1.0/users"
 			// "Basic: clientId:secretId" + authenticated() -> security headers
 			// (response)
-
-			// "/oauth/token"
-			// "Basic: clientId:secretId" + hasRole("USER") -> security headers
-			// (response)
-
-			// HttpAuthenticationFilter: use OAuthAuthenticationManager to
-			// authenticate the request
 			http
+					.requestMatchers().antMatchers(HttpMethod.POST, "/v1.0/users")
+					.and()
 					.authorizeRequests()
 					.antMatchers(HttpMethod.POST, "/v1.0/users").fullyAuthenticated()
-					.antMatchers("/oauth/token").hasRole("USER")
 					.and()
 					.exceptionHandling().accessDeniedHandler(oAuthAccessDeniedHandler)
 					.and()
@@ -86,7 +78,6 @@ public class MultiWebSecurityConfiguration {
 					.and()
 					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 					.and()
-					.anonymous().disable()
 					.csrf().disable()
 					.logout().disable()
 					.rememberMe().disable()
@@ -102,15 +93,92 @@ public class MultiWebSecurityConfiguration {
 	}
 
 	@Configuration
-	public static class TokenEndpointWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
+	@Order(2)
+	public static class WelcomeHtmlWebSecurityConfigurer extends
+			WebSecurityConfigurerAdapter {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			// All other requests are denied by default
+			// "/index.html", "/signup.html":
+			// anonymous() (request) -> security headers (response)
 
+			// @formatter:off
 			http
-					.authorizeRequests()
-					.anyRequest().denyAll();
+			.requestMatchers()
+				.antMatchers("/", "/index.html", "/signup.html")
+			.and()
+			.authorizeRequests()
+				.antMatchers("/", "/index.html", "/signup.html").permitAll()
+			.and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+				.and()
+				.httpBasic().disable()
+				.csrf().disable()
+				.logout().disable()
+				.rememberMe().disable()
+				.formLogin().disable()
+				.logout().disable()
+				.x509().disable();
+			// @formatter:on
+		}
+	}
+
+	@Configuration
+	@Order(4)
+	public static class AccountMgmtWebSecurityConfigurer extends
+			WebSecurityConfigurerAdapter {
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			// "/dashboard.html","/forgot_password.html", "/request_email.html",
+			// "/reset_password.html","/validate.html"
+			// Bearer (request) + hasRole("USER") -> security headers (response)
+
+			// @formatter:off
+			http
+			.requestMatchers()
+				.antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", 
+						"/reset_password.html","/validate.html")
+			.and()
+			.authorizeRequests()
+				.antMatchers("/dashboard.html","/forgot_password.html", "/request_email.html", 
+						"/reset_password.html","/validate.html").permitAll()
+			.and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+				.and()
+				.httpBasic().disable()
+				.csrf().disable()
+				.logout().disable()
+				.rememberMe().disable()
+				.formLogin().disable()
+				.logout().disable()
+				.x509().disable();
+			// @formatter:on
+		}
+	}
+
+	@Configuration
+	@Order(5)
+	public static class DenyAllWebSecurityConfigurer extends
+			WebSecurityConfigurerAdapter {
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			// @formatter:off
+			http
+				.authorizeRequests().anyRequest().denyAll()
+			    .and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+				.and()
+				.headers().disable()
+				.httpBasic().disable()
+				.csrf().disable()
+				.logout().disable()
+				.rememberMe().disable()
+				.formLogin().disable()
+				.logout().disable()
+				.x509().disable();
+			// @formatter:on
 		}
 	}
 
@@ -119,7 +187,8 @@ public class MultiWebSecurityConfiguration {
 		return new BCryptPasswordEncoder();
 	}
 
-	// other urls default use this authentication manager
+	// Other urls by default use this authentication manager except oauth 2
+	// protected urls
 	@Bean
 	public AuthenticationManager userAuthenticationManager() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -131,15 +200,17 @@ public class MultiWebSecurityConfiguration {
 		return am;
 	}
 
-	// used by /v1.0/users and "/oauth/token"
+	// used by /v1.0/users + post http method
 	@Bean
 	public AuthenticationManager clientAuthenticationManager() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+
+		// use OAuth2 client details services to load client details
 		provider.setUserDetailsService(clientDetailsUserDetailsService);
 		List<AuthenticationProvider> providers = new ArrayList<AuthenticationProvider>();
 		providers.add(provider);
 		AuthenticationManager am = new ProviderManager(providers);
 		return am;
-	}
 
+	}
 }

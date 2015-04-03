@@ -55,6 +55,9 @@ public class OAuth2ServerConfiguration {
 
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
+			// Protected REST APIs: "/me", "/v1.0/**"
+			// Bearer (request) + hasRole("USER") -> security headers (response)
+
 			// @formatter:off
 			http
 				.requestMatchers().antMatchers("/me", "/v1.0/**")
