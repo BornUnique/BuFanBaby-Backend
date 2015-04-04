@@ -96,3 +96,7 @@ Spring Security relies on Spring’s localization support in order to actually loo
 7. escape html from json input
 
 8. i18n l10n
+
+9. profile
+
+10 unit test / integration test
