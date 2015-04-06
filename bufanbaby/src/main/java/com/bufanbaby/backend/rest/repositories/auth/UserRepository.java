@@ -8,6 +8,12 @@ public interface UserRepository {
 
 	boolean emailExists(String email);
 
-	String add(User user);
+	void saveAccessToken(String uid, String token);
+
+	String saveUser(User user);
+
+	User findUserByUsername(String username);
+
+	User findUserById(String uid);
 
 }

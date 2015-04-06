@@ -63,8 +63,10 @@ public class OAuth2ServerConfiguration {
 				.requestMatchers().antMatchers("/me", "/v1.0/**")
 				.and()
 			        .authorizeRequests()
-			        .antMatchers("/me", "/v1.0/**").hasRole("User")
-			     .and().logout().disable();
+			        .antMatchers("/me", "/v1.0/**").fullyAuthenticated()
+			     .and()
+			     .logout().disable()
+			     .anonymous().disable();
 			// @formatter:on
 		}
 	}
@@ -110,15 +112,20 @@ public class OAuth2ServerConfiguration {
 		InMemoryClientDetailsService clientDetailsService = new InMemoryClientDetailsService();
 		Map<String, ClientDetails> clientDetailsStore = new HashMap<>(3);
 
+		List<String> grantTypes = new ArrayList<>(2);
+		grantTypes.add("password");
+		grantTypes.add("refresh_token");
+
+		List<String> scopes = new ArrayList<String>(2);
+		scopes.add("read");
+		scopes.add("write");
+
 		// web client
 		BaseClientDetails webClient = new BaseClientDetails();
 		webClient.setClientId("353b302c44574f565045687e534e7d6a");
 		webClient.setClientSecret("286924697e615a672a646a493545646c");
-
-		List<String> webScopes = new ArrayList<String>(2);
-		webScopes.add("read");
-		webScopes.add("write");
-		webClient.setScope(webScopes);
+		webClient.setAuthorizedGrantTypes(grantTypes);
+		webClient.setScope(scopes);
 
 		List<GrantedAuthority> webAuthorities = new ArrayList<>(1);
 		webAuthorities.add(new SimpleGrantedAuthority("ROLE_WEB"));
@@ -134,11 +141,8 @@ public class OAuth2ServerConfiguration {
 		BaseClientDetails androidClient = new BaseClientDetails();
 		androidClient.setClientId("7b5a38705d7b3562655925406a652e32");
 		androidClient.setClientSecret("655f523128212d6e70634446224c2a48");
-
-		List<String> androidScopes = new ArrayList<String>(2);
-		androidScopes.add("read");
-		androidScopes.add("write");
-		androidClient.setScope(androidScopes);
+		androidClient.setAuthorizedGrantTypes(grantTypes);
+		androidClient.setScope(scopes);
 
 		List<GrantedAuthority> androidAuthorities = new ArrayList<>(1);
 		androidAuthorities.add(new SimpleGrantedAuthority("ROLE_ANDROID"));
@@ -154,11 +158,8 @@ public class OAuth2ServerConfiguration {
 		BaseClientDetails iosClient = new BaseClientDetails();
 		iosClient.setClientId("5e572e694e4d61763b567059273a4d3d");
 		iosClient.setClientSecret("316457735c4055642744596b302e2151");
-
-		List<String> iosScopes = new ArrayList<String>(2);
-		iosScopes.add("read");
-		iosScopes.add("write");
-		iosClient.setScope(iosScopes);
+		iosClient.setAuthorizedGrantTypes(grantTypes);
+		iosClient.setScope(scopes);
 
 		List<GrantedAuthority> iosAuthorities = new ArrayList<>(1);
 		iosAuthorities.add(new SimpleGrantedAuthority("ROLE_IOS"));

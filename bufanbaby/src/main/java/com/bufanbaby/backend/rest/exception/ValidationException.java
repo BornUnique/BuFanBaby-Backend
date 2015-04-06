@@ -55,4 +55,7 @@ public class ValidationException extends WebApplicationException {
 		return response;
 	}
 
+	public void addViolation(Violation violation) {
+		this.violations.add(violation);
+	}
 }

@@ -55,6 +55,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-redis")
     compile("org.springframework.boot:spring-boot-starter-security")
     compile("org.springframework.security.oauth:spring-security-oauth2:${springSecurityOAuth2Version}")
+    compile("com.google.guava:guava:18.0")
     //compile("org.springframework.boot:spring-boot-starter-velocity")
     compile("org.springframework.boot:spring-boot-starter-web")
     //runtime("org.apache.derby:derby")

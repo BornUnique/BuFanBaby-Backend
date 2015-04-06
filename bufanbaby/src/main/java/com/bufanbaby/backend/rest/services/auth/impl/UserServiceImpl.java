@@ -1,17 +1,28 @@
 package com.bufanbaby.backend.rest.services.auth.impl;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.core.SecurityContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.stereotype.Service;
 
 import com.bufanbaby.backend.rest.domain.auth.Role;
@@ -27,23 +38,35 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final DefaultTokenServices tokenServices;
+	private final ClientDetailsService clientDetailsService;
 
 	@Autowired
-	public UserServiceImpl(final UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public UserServiceImpl(final UserRepository userRepository, PasswordEncoder passwordEncoder,
+			DefaultTokenServices tokenServices,
+			ClientDetailsService clientDetailsService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.tokenServices = tokenServices;
+		this.clientDetailsService = clientDetailsService;
 	}
 
 	@Override
-	public User create(SignUpRequest signUpRequest) {
+	@PermitAll
+	public String create(SignUpRequest signUpRequest, SecurityContext sc) {
 		String email = signUpRequest.getEmail();
 		String username = signUpRequest.getUsername();
+
+		// TODO: normalize username and email
+		// String emailAddress =
+		// createUserRequest.getUser().getEmailAddress().toLowerCase();
 
 		if (!userRepository.usernameExists(username)) {
 			logger.info(
 					"User does not already exist in the data store - creating a new user [{}].",
 					signUpRequest);
 
+			// Save user into Redis
 			String hashedPassword = passwordEncoder.encode(signUpRequest.getPassword());
 
 			User user = new User();
@@ -53,23 +76,71 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			user.setLastName(signUpRequest.getLastName());
 			user.setPassword(hashedPassword);
 
-			GrantedAuthority authority = new SimpleGrantedAuthority(Role.USER.name());
-			Set<GrantedAuthority> authorities = new HashSet<>();
-			authorities.add(authority);
+			Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(
+					Role.USER.name()));
 			user.setAuthorities(authorities);
 
-			// TODO: what should be returned from redis repository
-			String userId = userRepository.add(user);
-			logger.info("Created new user [{}].", userId);
-			return user;
+			String userId = userRepository.saveUser(user);
+			logger.info("Saved new user [{}].", user);
+
+			// Create OAuth2 access token
+			OAuth2AccessToken accessToken = createAccessToken(sc, hashedPassword, authorities,
+					userId);
+
+			// Save OAuth access token into Redis
+			saveAccessToken(userId, accessToken);
+
+			// TODO: Send Email verification
+
+			// return user to create a response
+			return accessToken.getValue();
 		} else {
-			logger.info("Duplicate user located, exception raised with appropriate HTTP response code.");
+			logger.info("Duplicate user found, exception raised with appropriate HTTP response code.");
 			throw new DuplicateUserException();
 		}
 	}
 
+	private OAuth2AccessToken createAccessToken(SecurityContext sc, String hashedPassword,
+			Set<GrantedAuthority> authorities, String userId) {
+		String clientId = sc.getUserPrincipal().getName();
+		UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(
+				userId, hashedPassword, authorities);
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
+		OAuth2Request oAuth2Request = new OAuth2Request(null, clientId, authorities, true,
+				clientDetails.getScope(), null, null, null, null);
+
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(oAuth2Request,
+				usernamePasswordToken);
+		return tokenServices.createAccessToken(oAuth2Authentication);
+	}
+
+	private void saveAccessToken(String uid, OAuth2AccessToken accessToken) {
+		String token = accessToken.getValue();
+		userRepository.saveAccessToken(uid, token);
+	}
+
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return null;
+	@RolesAllowed("USER")
+	public UserDetails loadUserByUsername(String username)
+			throws UsernameNotFoundException {
+		return userRepository.findUserByUsername(username);
+	}
+
+	@Override
+	@RolesAllowed("USER")
+	public User loadUserById(String userId) {
+		return userRepository.findUserById(userId);
+	}
+
+	@Override
+	@PermitAll
+	public boolean emailExists(String email) {
+		return userRepository.emailExists(email);
+	}
+
+	@Override
+	@PermitAll
+	public boolean usernameExists(String username) {
+		return userRepository.usernameExists(username);
 	}
 }

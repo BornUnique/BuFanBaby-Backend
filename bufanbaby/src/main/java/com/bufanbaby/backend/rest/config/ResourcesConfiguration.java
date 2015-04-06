@@ -12,16 +12,13 @@ import org.springframework.stereotype.Component;
 
 /**
  * This is the bootstrap class for Jersey application. Spring component
- * annotation is used to hook into Spring Boot auto-configuration feature.
- * 
- * See: spring-boot-starter-jersey
- * http://docs.spring.io/spring-boot/docs/1.2.2.RELEASE/reference/htmlsingle
- * /#boot-features-jersey
+ * annotation is used to hook into Spring Boot auto-configuration feature
+ * because Boot will look for a bean of ResourceConfig type.
  */
 @Component
 @ApplicationPath("/v1.0")
 public class ResourcesConfiguration extends ResourceConfig {
-	private final static Logger logger = Logger.getLogger(ResourcesConfiguration.class.getName());
+	private final static Logger logger = Logger.getLogger("JerseyLoggingFilter");
 
 	public ResourcesConfiguration() {
 

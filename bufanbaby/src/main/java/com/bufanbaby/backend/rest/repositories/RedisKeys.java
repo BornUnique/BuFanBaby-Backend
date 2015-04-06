@@ -44,6 +44,10 @@ public abstract class RedisKeys {
 		return "user:" + name + ":uid";
 	}
 
+	public static String email(String email) {
+		return "user:" + email + ":uid";
+	}
+
 	public static String users() {
 		return "users";
 	}
