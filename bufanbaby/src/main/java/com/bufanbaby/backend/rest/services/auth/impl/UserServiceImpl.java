@@ -120,14 +120,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	@Override
-	@RolesAllowed("USER")
+	@RolesAllowed("ROLE_WEB")
 	public UserDetails loadUserByUsername(String username)
 			throws UsernameNotFoundException {
 		return userRepository.findUserByUsername(username);
 	}
 
 	@Override
-	@RolesAllowed("USER")
 	public User loadUserById(String userId) {
 		return userRepository.findUserById(userId);
 	}

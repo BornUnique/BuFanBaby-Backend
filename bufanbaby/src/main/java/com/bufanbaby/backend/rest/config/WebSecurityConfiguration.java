@@ -29,18 +29,10 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 public class WebSecurityConfiguration {
 
 	@Autowired
-	private AuthenticationManager userAuthenticationManager;
-
-	@Autowired
 	private UserDetailsService userServiceImpl;
 
 	@Autowired
 	UserDetailsService clientDetailsUserDetailsService;
-
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		auth.parentAuthenticationManager(userAuthenticationManager);
-	}
 
 	@Configuration
 	@Order(1)
@@ -107,11 +99,9 @@ public class WebSecurityConfiguration {
 			http
 			.requestMatchers()
 				.antMatchers("/", "/index.html", "/signup.html")
-				.antMatchers(HttpMethod.GET, "/v1.0/users/**")
 			.and()
 			.authorizeRequests()
 				.antMatchers("/", "/index.html", "/signup.html").permitAll()
-				.antMatchers(HttpMethod.GET, "/v1.0/users/**").permitAll()
 			.and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
