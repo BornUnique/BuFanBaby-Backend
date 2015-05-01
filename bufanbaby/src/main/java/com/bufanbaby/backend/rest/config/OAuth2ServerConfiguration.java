@@ -22,7 +22,6 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
 import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
@@ -86,7 +85,7 @@ public class OAuth2ServerConfiguration {
 		private ClientDetailsService clientDetailsService;
 
 		@Autowired
-		private AuthenticationManager oAuthClientAuthenticationManager;
+		private AuthenticationManager userAuthenticationManager;
 
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -97,7 +96,7 @@ public class OAuth2ServerConfiguration {
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.tokenStore(tokenStore);
 			endpoints.tokenServices(tokenServices);
-			endpoints.authenticationManager(oAuthClientAuthenticationManager);
+			endpoints.authenticationManager(userAuthenticationManager);
 		}
 	}
 
@@ -180,17 +179,6 @@ public class OAuth2ServerConfiguration {
 		ClientDetailsUserDetailsService cduds = new ClientDetailsUserDetailsService(
 				clientDetailsService());
 		return cduds;
-	}
-
-	@Bean
-	public AuthenticationManager oAuthClientAuthenticationManager() throws Exception {
-		OAuth2AuthenticationManager oaam = new OAuth2AuthenticationManager();
-		ClientDetailsService clientDetailsService = clientDetailsService();
-		oaam.setClientDetailsService(clientDetailsService);
-		DefaultTokenServices tokenServices = tokenServices();
-		tokenServices.setClientDetailsService(clientDetailsService);
-		oaam.setTokenServices(tokenServices);
-		return oaam;
 	}
 
 	@Bean

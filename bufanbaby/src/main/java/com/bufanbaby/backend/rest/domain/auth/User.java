@@ -23,7 +23,7 @@ public class User implements UserDetails {
 	private boolean accountNonExpired = true;
 	private boolean accountNonLocked = true;
 	private boolean credentialsNonExpired = true;
-	private boolean enabled = false;
+	private boolean enabled = true;
 	private boolean verified = false;
 
 	private LocalDateTime birthday;
