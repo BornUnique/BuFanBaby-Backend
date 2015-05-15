@@ -59,10 +59,10 @@ public class OAuth2ServerConfiguration {
 
 			// @formatter:off
 			http
-				.requestMatchers().antMatchers("/me", "/v1.0/**")
+				.requestMatchers().antMatchers("/me"/*, "/v1.0/**" */)
 				.and()
 			        .authorizeRequests()
-			        .antMatchers("/me", "/v1.0/**").fullyAuthenticated()
+			        .antMatchers("/me"/*, "/v1.0/**" */).fullyAuthenticated()
 			     .and()
 			     .logout().disable()
 			     .anonymous().disable();

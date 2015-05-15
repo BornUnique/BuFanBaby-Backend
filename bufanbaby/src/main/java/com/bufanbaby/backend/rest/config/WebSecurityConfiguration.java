@@ -159,7 +159,7 @@ public class WebSecurityConfiguration {
 		protected void configure(HttpSecurity http) throws Exception {
 			// @formatter:off
 			http
-				.authorizeRequests().anyRequest().denyAll()
+				.authorizeRequests().anyRequest().permitAll()
 				.and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			    .and()
