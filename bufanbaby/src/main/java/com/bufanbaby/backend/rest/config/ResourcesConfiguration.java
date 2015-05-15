@@ -6,6 +6,7 @@ import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.springframework.stereotype.Component;
@@ -29,5 +30,7 @@ public class ResourcesConfiguration extends ResourceConfig {
 		register(new LoggingFilter(logger, true));
 
 		register(JacksonFeature.class);
+
+		register(MultiPartFeature.class);
 	}
 }
