@@ -1,7 +1,7 @@
 package com.bufanbaby.backend.rest.exception;
 
 @SuppressWarnings("serial")
-public class DuplicateUserException extends AbstractWebApplicationException {
+public class DuplicateUserException extends GenericWebApplicationException {
 
 	public DuplicateUserException() {
 		super(409, "User already exists",
