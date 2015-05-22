@@ -2,19 +2,22 @@ package com.bufanbaby.backend.rest.resources.multipart;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -25,7 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.bufanbaby.backend.rest.config.AppProperties;
+import com.bufanbaby.backend.rest.domain.FileMetadata;
 import com.bufanbaby.backend.rest.domain.MediaTypes;
+import com.bufanbaby.backend.rest.domain.Moment;
+import com.bufanbaby.backend.rest.domain.Tag;
 import com.bufanbaby.backend.rest.exception.GenericWebApplicationException;
 import com.bufanbaby.backend.rest.exception.MediaTypeNotAllowedException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
@@ -34,9 +40,7 @@ import com.bufanbaby.backend.rest.services.moments.MomentService;
 @Component
 @Path("{userId}/moments")
 public class MomentsResource {
-	private static final Logger logger = LoggerFactory.getLogger(MomentService.class);
-
-	private static final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	private static final Logger logger = LoggerFactory.getLogger(MomentsResource.class);
 
 	@Autowired
 	private AppProperties appProperties;
@@ -44,15 +48,33 @@ public class MomentsResource {
 	@Autowired
 	private MomentService momentService;
 
+	@Context
+	private UriInfo uriInfo;
+
+	/**
+	 * 
+	 * @param userId
+	 * @param comment
+	 * @param ownerTag
+	 * @param spouseTag
+	 * @param childrenTags
+	 * @param files
+	 * @return
+	 */
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response postMoments(@PathParam("userId") String userId,
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postMoments(
+			@PathParam("userId") String userId,
 			@FormDataParam("comment") String comment,
+			@FormDataParam("ownerTag") String ownerTag,
+			@FormDataParam("spouseTag") String spouseTag,
+			@FormDataParam("childrenTag") List<String> childrenTags,
 			@FormDataParam("file") List<FormDataBodyPart> files) {
 
 		// Check total files if over limit
 		int size = files.size();
-		if (size > appProperties.maxFilesPerUpload()) {
+		if (size > appProperties.getMaxFilesPerUpload()) {
 			throw new UploadedFilesOverLimitException();
 		}
 
@@ -68,49 +90,65 @@ public class MomentsResource {
 			}
 		}
 
-		// Create directory based on pattern: {userId}/{yyyy-mm-dd}/
-		String creationDatePath = LocalDateTime.now().format(dtFormatter);
-		java.nio.file.Path parentPath = Paths.get(appProperties.uploadedFilesLocation(), userId,
-				creationDatePath);
-		try {
-			Files.createDirectories(parentPath);
-		} catch (IOException e) {
-			logger.error("Error when creating directory: " + parentPath, e);
-			throw new GenericWebApplicationException(500, "Server Failure",
-					"Failed to create directory");
-		}
-
-		// Save uploaded file as:
-		// {userId}/{yyyy-mm-dd}/{currentmillis}.{extension}
+		// Save uploaded file
+		List<FileMetadata> fileMetadatas = new ArrayList<FileMetadata>(size);
 		for (FormDataBodyPart formDataBodyPart : files) {
-
-			// Get max bytes for each uploaded file based on media type
-			ContentDisposition contentDisposition = formDataBodyPart.getContentDisposition();
+			ContentDisposition disposition = formDataBodyPart.getContentDisposition();
 			MediaType mediaType = formDataBodyPart.getMediaType();
-			long maxBytesPerUploadedFile = appProperties.maxBytesPerMediaType(mediaType);
+			long maxBytesPerUploadedFile = appProperties.getMaxBytesPerMediaType(mediaType);
 
-			// Get current millis to create new file name
-			String newFileName = String.valueOf(Instant.now().toEpochMilli());
-			java.nio.file.Path destPath = Paths.get(parentPath.toString(), newFileName + "."
-					+ mediaType.getSubtype());
+			// save the file
+			String parentDir = appProperties.getParentDirectory(mediaType, userId);
+			createParentDirectories(parentDir);
+			String destPath = appProperties.getUploadedFileDestPath(mediaType, parentDir);
+			saveUploadedFile(formDataBodyPart, maxBytesPerUploadedFile, destPath);
 
-			try {
-				// Save uploaded file and report error if over allowed file size
-				momentService.saveUploadedFile(formDataBodyPart.getValueAs(InputStream.class),
-						destPath, maxBytesPerUploadedFile);
-			} catch (IOException e) {
-				logger.error("Error when saving file: " + destPath, e);
-				throw new GenericWebApplicationException(500, "Server Failure",
-						"Failed to create file");
-			}
+			// create file metadata
+			FileMetadata fileMetadata = new FileMetadata();
+			String originalName = disposition.getFileName();
+			fileMetadata.setOriginalName(originalName);
+			fileMetadata.setOriginalCreatedTime(0);
+			fileMetadata.setGeneratedName(null);
+			String relativePath = null;
+			fileMetadata.setRelativePath(relativePath);
+			fileMetadata.setMediaType(mediaType.toString());
+
+			fileMetadatas.add(fileMetadata);
 		}
 
-		return Response.status(200).build();
+		// Create the Moment
+		Tag tag = new Tag();
+		tag.setOwnerTag(ownerTag);
+		tag.setSpouseTag(spouseTag);
+		tag.setChildrenTags(childrenTags);
+
+		Moment moment = new Moment();
+		moment.setComment(comment);
+		moment.setEpochMilliCreated(Instant.now().toEpochMilli());
+		moment.setUserId(Long.parseLong(userId));
+		moment.setFileMetadatas(fileMetadatas);
+		moment.setTag(tag);
+		//
+		// // Save the moment
+		// momentService.save(moment);
+
+		// TODO: after saved in Redis then get an id
+		String momentId = "9999";
+
+		// Return response based on Post semantic
+		URI location = uriInfo.getAbsolutePathBuilder().path(momentId).build();
+		return Response.created(location).entity(moment).build();
 	}
 
+	/**
+	 * Check if the uploaded file media type is allowed.
+	 * 
+	 * @param mediaType
+	 *            the media type of the uploaded file
+	 * @return true if allowed, false otherwise
+	 */
 	private boolean isMediaTypeAllowed(MediaType mediaType) {
 		if (mediaType.equals(MediaTypes.JPG.getMediaType())
-				|| mediaType.equals(MediaTypes.TXT.getMediaType())
 				|| mediaType.equals(MediaTypes.PDF.getMediaType())
 				|| mediaType.equals(MediaTypes.PNG.getMediaType())
 				|| mediaType.equals(MediaTypes.GIF.getMediaType())
@@ -124,4 +162,43 @@ public class MomentsResource {
 		return false;
 	}
 
+	/**
+	 * Create the parent directories for the uploaded file before creating the
+	 * file itself.
+	 * <p>
+	 * Pattern: D:/moments/documents/{userId}/2015/05/20/
+	 */
+	private void createParentDirectories(String parentDir) {
+		try {
+			Files.createDirectories(Paths.get(parentDir));
+		} catch (IOException e) {
+			logger.error("Error when creating directory: " + parentDir, e);
+			throw new GenericWebApplicationException(500, "Server Failure",
+					"Failed to create directory");
+		}
+	}
+
+	/**
+	 * Save the uploaded to the given file name.
+	 * <p>
+	 * Pattern:Pattern:
+	 * D:/moments/documents/{userId}/2015/05/20/{currentmillis}.pdf
+	 * 
+	 * @param formDataBodyPart
+	 *            the form data body part
+	 * @param maxBytesPerUploadedFile
+	 *            the max allowed bytes per file
+	 * @param destPath
+	 *            the full path
+	 */
+	private void saveUploadedFile(FormDataBodyPart formDataBodyPart, long maxBytesPerUploadedFile,
+			String destPath) {
+		try {
+			momentService.saveUploadedFile(formDataBodyPart.getValueAs(InputStream.class),
+					destPath, maxBytesPerUploadedFile);
+		} catch (IOException e) {
+			throw new GenericWebApplicationException(500, "Server Failure",
+					"Failed to create file");
+		}
+	}
 }

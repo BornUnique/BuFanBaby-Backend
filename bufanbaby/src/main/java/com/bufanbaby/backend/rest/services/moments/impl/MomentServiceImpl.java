@@ -3,34 +3,40 @@ package com.bufanbaby.backend.rest.services.moments.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bufanbaby.backend.rest.config.AppProperties;
+import com.bufanbaby.backend.rest.domain.Moment;
+import com.bufanbaby.backend.rest.repositories.MomentRepository;
 import com.bufanbaby.backend.rest.services.moments.MomentService;
 
 @Service
 public class MomentServiceImpl implements MomentService {
 	private static final Logger logger = LoggerFactory.getLogger(MomentService.class);
 
-	private AppProperties appProperties;
+	private MomentRepository momentRepository;
 
 	@Autowired
-	public MomentServiceImpl(AppProperties appProperties) {
-		this.appProperties = appProperties;
+	public MomentServiceImpl(MomentRepository momentRepository) {
+		this.momentRepository = momentRepository;
 	}
 
+	/**
+	 * Save the uploaded file into the given path.
+	 */
 	@Override
-	public void saveUploadedFile(InputStream is, Path destPath, long maxBytesPerUploadedFile)
+	public void saveUploadedFile(InputStream is, String destPath, long maxBytesPerUploadedFile)
 			throws IOException {
 		SizeLimitedInputStream slis = new SizeLimitedInputStream(is, maxBytesPerUploadedFile);
 		try {
-			Files.copy(slis, destPath, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(slis, Paths.get(destPath));
+		} catch (IOException e) {
+			logger.error("Error when saving file: " + destPath, e);
+			throw e;
 		} finally {
 			try {
 				slis.close();
@@ -38,6 +44,13 @@ public class MomentServiceImpl implements MomentService {
 				logger.info("Cannot close InputStream of file: " + destPath, e);
 			}
 		}
+	}
+
+	@Override
+	public Moment save(Moment moment) {
+		long momentId = momentRepository.create(moment);
+		moment.setId(momentId);
+		return moment;
 	}
 
 	private class SizeLimitedInputStream extends InputStream {

@@ -4,7 +4,6 @@ import javax.ws.rs.core.MediaType;
 
 public enum MediaTypes {
 	// @formatter:off
-    TXT(".txt", MediaType.TEXT_PLAIN_TYPE),
     PDF(".pdf", new MediaType("application", "pdf")),
     JPG(".jpg", new MediaType("image", "jpeg")),
     PNG(".png", new MediaType("image", "png")),
@@ -16,7 +15,6 @@ public enum MediaTypes {
     MPEG(".mpeg", new MediaType("video", "mpeg"));
     // @formatter:on
 
-	@SuppressWarnings("unused")
 	private final String extension;
 
 	private final MediaType mediaType;
@@ -32,4 +30,23 @@ public enum MediaTypes {
 	public MediaType getMediaType() {
 		return mediaType;
 	}
+
+	public String getExtension() {
+		return extension;
+	}
+
+	/**
+	 * Gets the file extension.
+	 *
+	 * @return the file extension.
+	 */
+	public static String getExtension(MediaType mediaType) {
+		for (MediaTypes mt : MediaTypes.values()) {
+			if (mt.getMediaType().equals(mediaType)) {
+				return mt.getExtension();
+			}
+		}
+		throw new IllegalArgumentException(mediaType.toString());
+	}
+
 }

@@ -1,29 +1,71 @@
 package com.bufanbaby.backend.rest.domain;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 public class Moment {
 
-	private String id;
+	/**
+	 * The moment identifier
+	 */
+	private long id;
 
-	private String userId;
+	/**
+	 * The user's identifier
+	 */
+	private long userId;
 
+	/**
+	 * The comment content
+	 */
 	private String comment;
 
+	/**
+	 * The epoch millisecond of the created time
+	 */
 	private long epochMilliCreated;
 
+	/**
+	 * The epoch millisecond of the modified time
+	 */
 	private long epochMilliModified;
 
-	private Set<Tag> tags;
+	/**
+	 * Keep it private
+	 */
+	private boolean privateScope = true;
 
-	private Map<String, String> files;
+	/**
+	 * Share it to friend
+	 */
+	private boolean friendScope = false;
 
-	public String getId() {
+	/**
+	 * Share it to world
+	 */
+	private boolean worldScope = false;
+
+	/**
+	 * The tags of the current comment
+	 */
+	private Tag tag;
+
+	/**
+	 * The list of uploaded file metadata
+	 */
+	private List<FileMetadata> fileMetadatas;
+
+	/**
+	 * 1 moment belongs to multiple timelines which matches the tag names. In
+	 * other word, each tag name has its own timeline. But the owner has all of
+	 * the moments.
+	 */
+	private List<Timeline> timlines;
+
+	public long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
@@ -35,20 +77,12 @@ public class Moment {
 		this.comment = comment;
 	}
 
-	public Map<String, String> getFiles() {
-		return files;
+	public List<FileMetadata> getFileMetadatas() {
+		return fileMetadatas;
 	}
 
-	public void setFiles(Map<String, String> files) {
-		this.files = files;
-	}
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setFileMetadatas(List<FileMetadata> fileMetadatas) {
+		this.fileMetadatas = fileMetadatas;
 	}
 
 	public long getEpochMilliCreated() {
@@ -67,11 +101,51 @@ public class Moment {
 		this.epochMilliModified = epochMilliModified;
 	}
 
-	public Set<Tag> getTags() {
-		return tags;
+	public Tag getTag() {
+		return tag;
 	}
 
-	public void setTags(Set<Tag> tags) {
-		this.tags = tags;
+	public void setTag(Tag tag) {
+		this.tag = tag;
+	}
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
+	public List<Timeline> getTimlines() {
+		return timlines;
+	}
+
+	public void setTimlines(List<Timeline> timlines) {
+		this.timlines = timlines;
+	}
+
+	public boolean isPrivateScope() {
+		return privateScope;
+	}
+
+	public void setPrivateScope(boolean privateScope) {
+		this.privateScope = privateScope;
+	}
+
+	public boolean isFriendScope() {
+		return friendScope;
+	}
+
+	public void setFriendScope(boolean friendScope) {
+		this.friendScope = friendScope;
+	}
+
+	public boolean isWorldScope() {
+		return worldScope;
+	}
+
+	public void setWorldScope(boolean worldScope) {
+		this.worldScope = worldScope;
 	}
 }
