@@ -10,6 +10,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import com.bufanbaby.backend.rest.domain.auth.User;
 import com.bufanbaby.backend.rest.exception.UserNotFoundException;
+import com.bufanbaby.backend.rest.resources.AbstractResource;
 
 @Path("/me")
 @Produces({ MediaType.APPLICATION_JSON })

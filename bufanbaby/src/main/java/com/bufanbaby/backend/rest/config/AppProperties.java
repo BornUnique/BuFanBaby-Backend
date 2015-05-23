@@ -1,6 +1,6 @@
 package com.bufanbaby.backend.rest.config;
 
-import static com.bufanbaby.backend.rest.domain.Symbols.FORWARD_SLASH;
+import static com.bufanbaby.backend.rest.domain.moment.Symbols.FORWARD_SLASH;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.bufanbaby.backend.rest.domain.MediaTypes;
+import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
 
 @Component
 public class AppProperties {

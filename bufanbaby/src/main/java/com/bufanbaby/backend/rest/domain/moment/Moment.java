@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.domain;
+package com.bufanbaby.backend.rest.domain.moment;
 
 import java.util.List;
 
@@ -15,9 +15,9 @@ public class Moment {
 	private long userId;
 
 	/**
-	 * The comment content
+	 * The message content
 	 */
-	private String comment;
+	private String message;
 
 	/**
 	 * The epoch millisecond of the created time
@@ -61,6 +61,8 @@ public class Moment {
 	 */
 	private List<Timeline> timlines;
 
+	private List<Comment> comments;
+
 	public long getId() {
 		return id;
 	}
@@ -69,12 +71,12 @@ public class Moment {
 		this.id = id;
 	}
 
-	public String getComment() {
-		return comment;
+	public String getMessage() {
+		return message;
 	}
 
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public List<FileMetadata> getFileMetadatas() {
@@ -147,5 +149,13 @@ public class Moment {
 
 	public void setWorldScope(boolean worldScope) {
 		this.worldScope = worldScope;
+	}
+
+	public List<Comment> getComments() {
+		return comments;
+	}
+
+	public void setComments(List<Comment> comments) {
+		this.comments = comments;
 	}
 }
