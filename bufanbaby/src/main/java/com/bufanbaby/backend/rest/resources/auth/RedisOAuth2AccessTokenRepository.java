@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.repositories.redis;
+package com.bufanbaby.backend.rest.resources.auth;
 
 
 public interface RedisOAuth2AccessTokenRepository {

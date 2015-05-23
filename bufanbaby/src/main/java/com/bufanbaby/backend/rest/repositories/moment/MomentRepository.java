@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.repositories;
+package com.bufanbaby.backend.rest.repositories.moment;
 
 import org.springframework.stereotype.Component;
 
