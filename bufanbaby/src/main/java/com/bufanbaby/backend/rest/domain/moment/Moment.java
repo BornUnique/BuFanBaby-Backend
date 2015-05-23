@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.domain;
+package com.bufanbaby.backend.rest.domain.moment;
 
 import java.util.List;
 

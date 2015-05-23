@@ -10,8 +10,8 @@ import java.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bufanbaby.backend.rest.domain.MediaTypes;
-import com.bufanbaby.backend.rest.domain.Symbols;
+import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
+import com.bufanbaby.backend.rest.domain.moment.Symbols;
 
 public class AppPropertiesTest {
 	private static final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");

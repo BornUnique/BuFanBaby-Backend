@@ -28,10 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.bufanbaby.backend.rest.config.AppProperties;
-import com.bufanbaby.backend.rest.domain.FileMetadata;
-import com.bufanbaby.backend.rest.domain.MediaTypes;
-import com.bufanbaby.backend.rest.domain.Moment;
-import com.bufanbaby.backend.rest.domain.Tag;
+import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
+import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
+import com.bufanbaby.backend.rest.domain.moment.Moment;
+import com.bufanbaby.backend.rest.domain.moment.Tag;
 import com.bufanbaby.backend.rest.exception.GenericWebApplicationException;
 import com.bufanbaby.backend.rest.exception.MediaTypeNotAllowedException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;

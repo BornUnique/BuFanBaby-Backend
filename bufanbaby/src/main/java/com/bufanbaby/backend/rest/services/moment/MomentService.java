@@ -3,7 +3,7 @@ package com.bufanbaby.backend.rest.services.moment;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.bufanbaby.backend.rest.domain.Moment;
+import com.bufanbaby.backend.rest.domain.moment.Moment;
 
 public interface MomentService {
 

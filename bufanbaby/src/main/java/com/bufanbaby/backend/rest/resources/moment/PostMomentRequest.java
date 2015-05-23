@@ -2,8 +2,8 @@ package com.bufanbaby.backend.rest.resources.moment;
 
 import javax.validation.constraints.NotNull;
 
-import com.bufanbaby.backend.rest.domain.ShareScope;
-import com.bufanbaby.backend.rest.domain.Tag;
+import com.bufanbaby.backend.rest.domain.moment.ShareScope;
+import com.bufanbaby.backend.rest.domain.moment.Tag;
 
 public class PostMomentRequest {
 
