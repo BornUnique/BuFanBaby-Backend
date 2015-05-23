@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.resources.multipart;
+package com.bufanbaby.backend.rest.resources.moment;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,36 +35,28 @@ import com.bufanbaby.backend.rest.domain.Tag;
 import com.bufanbaby.backend.rest.exception.GenericWebApplicationException;
 import com.bufanbaby.backend.rest.exception.MediaTypeNotAllowedException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
-import com.bufanbaby.backend.rest.services.moments.MomentService;
+import com.bufanbaby.backend.rest.services.moment.MomentService;
 
 @Component
 @Path("{userId}/moments")
 public class MomentsResource {
 	private static final Logger logger = LoggerFactory.getLogger(MomentsResource.class);
 
-	@Autowired
 	private AppProperties appProperties;
-
-	@Autowired
 	private MomentService momentService;
 
-	@Context
-	private UriInfo uriInfo;
+	@Autowired
+	public MomentsResource(AppProperties appProperties, MomentService momentService) {
+		this.appProperties = appProperties;
+		this.momentService = momentService;
+	}
 
-	/**
-	 * 
-	 * @param userId
-	 * @param comment
-	 * @param ownerTag
-	 * @param spouseTag
-	 * @param childrenTags
-	 * @param files
-	 * @return
-	 */
+	// TODO: need pass JSON from client side
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response postMoments(
+			@Context UriInfo uriInfo,
 			@PathParam("userId") String userId,
 			@FormDataParam("comment") String comment,
 			@FormDataParam("ownerTag") String ownerTag,
@@ -123,7 +115,7 @@ public class MomentsResource {
 		tag.setChildrenTags(childrenTags);
 
 		Moment moment = new Moment();
-		moment.setComment(comment);
+		moment.setMessage(comment);
 		moment.setEpochMilliCreated(Instant.now().toEpochMilli());
 		moment.setUserId(Long.parseLong(userId));
 		moment.setFileMetadatas(fileMetadatas);

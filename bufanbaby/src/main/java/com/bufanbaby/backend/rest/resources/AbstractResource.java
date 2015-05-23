@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.resources.auth;
+package com.bufanbaby.backend.rest.resources;
 
 import java.util.Set;
 

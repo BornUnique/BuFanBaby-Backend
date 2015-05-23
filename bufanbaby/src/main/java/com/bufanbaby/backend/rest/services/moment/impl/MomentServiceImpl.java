@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.services.moments.impl;
+package com.bufanbaby.backend.rest.services.moment.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.bufanbaby.backend.rest.domain.Moment;
 import com.bufanbaby.backend.rest.repositories.MomentRepository;
-import com.bufanbaby.backend.rest.services.moments.MomentService;
+import com.bufanbaby.backend.rest.services.moment.MomentService;
 
 @Service
 public class MomentServiceImpl implements MomentService {

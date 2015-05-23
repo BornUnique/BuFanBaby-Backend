@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.services.moments;
+package com.bufanbaby.backend.rest.services.moment;
 
 import java.io.IOException;
 import java.io.InputStream;
