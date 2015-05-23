@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bufanbaby.backend.rest.domain.moment.Moment;
-import com.bufanbaby.backend.rest.repositories.MomentRepository;
+import com.bufanbaby.backend.rest.repositories.moment.MomentRepository;
 import com.bufanbaby.backend.rest.services.moment.MomentService;
 
 @Service
