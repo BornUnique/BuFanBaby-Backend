@@ -3,6 +3,7 @@ buildscript {
         springBootVersion = '1.2.3.RELEASE'
         springSecurityOAuth2Version = '2.0.7.RELEASE'
         jerseyVersion = '2.14'
+        //jedisRedisClientsVersion = '2.7.2'
     }
     repositories {
         mavenCentral()
@@ -41,6 +42,8 @@ configurations {
     //compile.exclude group: 'commons-pool2'
     compile.exclude group:'org.codehaus.jackson'
     
+    //compile.exclude group:'redis.clients', version:'2.5.2'
+    
     //compile.exclude group:'org.codehaus.jackson' name: '' version:''
     // exclude tomcat jdbc and juli logging
     
@@ -57,6 +60,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-redis")
     compile("org.springframework.boot:spring-boot-starter-security")
     compile("org.springframework.security.oauth:spring-security-oauth2:${springSecurityOAuth2Version}")
+    //compile("redis.clients:jedis:${jedisRedisClientsVersion}")
     compile("com.google.guava:guava:18.0")
     //compile("org.springframework.boot:spring-boot-starter-velocity")
     compile("org.springframework.boot:spring-boot-starter-web")
