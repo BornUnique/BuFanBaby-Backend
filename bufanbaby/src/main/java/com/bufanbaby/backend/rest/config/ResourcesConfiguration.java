@@ -11,6 +11,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.springframework.stereotype.Component;
 
+import com.bufanbaby.backend.rest.exception.DataAccessExceptionMapper;
+
 /**
  * This is the bootstrap class for Jersey application. Spring component
  * annotation is used to hook into Spring Boot auto-configuration feature
@@ -30,6 +32,12 @@ public class ResourcesConfiguration extends ResourceConfig {
 		register(new LoggingFilter(logger, true));
 
 		register(JacksonFeature.class);
+
+		// register html escaper of Jackson2
+		register(HTMLEscapeObjectMapper.class);
+
+		// register general DataAccessException mapper for Redis
+		register(DataAccessExceptionMapper.class);
 
 		register(MultiPartFeature.class);
 	}
