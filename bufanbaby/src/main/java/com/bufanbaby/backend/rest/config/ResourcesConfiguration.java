@@ -11,7 +11,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.springframework.stereotype.Component;
 
-import com.bufanbaby.backend.rest.exception.DataAccessExceptionMapper;
+import com.bufanbaby.backend.rest.exception.mapper.ThrowableMapper;
+import com.bufanbaby.backend.rest.exception.mapper.DataAccessExceptionMapper;
 
 /**
  * This is the bootstrap class for Jersey application. Spring component
@@ -38,6 +39,9 @@ public class ResourcesConfiguration extends ResourceConfig {
 
 		// register general DataAccessException mapper for Redis
 		register(DataAccessExceptionMapper.class);
+
+		// Catch all exception mapper
+		register(ThrowableMapper.class);
 
 		register(MultiPartFeature.class);
 	}

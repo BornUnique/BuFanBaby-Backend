@@ -25,6 +25,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.bufanbaby.backend.rest.config.AppProperties;
@@ -32,8 +34,8 @@ import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
 import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
 import com.bufanbaby.backend.rest.domain.moment.Moment;
 import com.bufanbaby.backend.rest.domain.moment.Tag;
-import com.bufanbaby.backend.rest.exception.GenericWebApplicationException;
-import com.bufanbaby.backend.rest.exception.MediaTypeNotAllowedException;
+import com.bufanbaby.backend.rest.exception.FileIOException;
+import com.bufanbaby.backend.rest.exception.UnsupportedFileTypeException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
 import com.bufanbaby.backend.rest.services.moment.MomentService;
 
@@ -42,13 +44,16 @@ import com.bufanbaby.backend.rest.services.moment.MomentService;
 public class MomentsResource {
 	private static final Logger logger = LoggerFactory.getLogger(MomentsResource.class);
 
-	private AppProperties appProperties;
-	private MomentService momentService;
+	private final AppProperties appProperties;
+	private final MomentService momentService;
+	private final MessageSource messageSource;
 
 	@Autowired
-	public MomentsResource(AppProperties appProperties, MomentService momentService) {
+	public MomentsResource(AppProperties appProperties, MomentService momentService,
+			MessageSource messageSource) {
 		this.appProperties = appProperties;
 		this.momentService = momentService;
+		this.messageSource = messageSource;
 	}
 
 	// TODO: need pass JSON from client side
@@ -67,7 +72,11 @@ public class MomentsResource {
 		// Check total files if over limit
 		int size = files.size();
 		if (size > appProperties.getMaxFilesPerUpload()) {
-			throw new UploadedFilesOverLimitException();
+			logger.warn("Detected uploaded files: {} over limit, user id: {}", size, userId);
+			throw new UploadedFilesOverLimitException(messageSource.getMessage(
+					"bufanbaby.uploaded.files.over.limit",
+					new Integer[] { appProperties.getMaxFilesPerUpload() },
+					LocaleContextHolder.getLocale()));
 		}
 
 		// Check media type to avoid attack
@@ -76,9 +85,11 @@ public class MomentsResource {
 			MediaType mediaType = formDataBodyPart.getMediaType();
 
 			if (!isMediaTypeAllowed(mediaType)) {
-				logger.warn("Detected not allowed media type: {}, user id: {}, file name: {}",
+				logger.warn("Detected unsupported media type: {}, user id: {}, file name: {}",
 						mediaType, userId, contentDisposition.getFileName());
-				throw new MediaTypeNotAllowedException();
+				throw new UnsupportedFileTypeException(messageSource.getMessage(
+						"bufanbaby.unsupported.file.type",
+						null, LocaleContextHolder.getLocale()));
 			}
 		}
 
@@ -165,8 +176,8 @@ public class MomentsResource {
 			Files.createDirectories(Paths.get(parentDir));
 		} catch (IOException e) {
 			logger.error("Error when creating directory: " + parentDir, e);
-			throw new GenericWebApplicationException(500, "Server Failure",
-					"Failed to create directory");
+			throw new FileIOException(messageSource.getMessage("bufanbaby.file.save.failure",
+					null, LocaleContextHolder.getLocale()));
 		}
 	}
 
@@ -189,8 +200,9 @@ public class MomentsResource {
 			momentService.saveUploadedFile(formDataBodyPart.getValueAs(InputStream.class),
 					destPath, maxBytesPerUploadedFile);
 		} catch (IOException e) {
-			throw new GenericWebApplicationException(500, "Server Failure",
-					"Failed to create file");
+			logger.error("Error when saving file: " + destPath, e);
+			throw new FileIOException(messageSource.getMessage("bufanbaby.file.save.failure",
+					null, LocaleContextHolder.getLocale()));
 		}
 	}
 }

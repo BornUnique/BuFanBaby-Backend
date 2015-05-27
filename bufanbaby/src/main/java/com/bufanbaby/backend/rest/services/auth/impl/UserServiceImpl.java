@@ -10,6 +10,8 @@ import javax.ws.rs.core.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,14 +42,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	private final PasswordEncoder passwordEncoder;
 	private final DefaultTokenServices tokenServices;
 	private final ClientDetailsService clientDetailsService;
+	private final MessageSource messageSource;
 
 	@Autowired
-	public UserServiceImpl(final UserRepository userRepository, PasswordEncoder passwordEncoder,
-			DefaultTokenServices tokenServices,
+	public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
+			DefaultTokenServices tokenServices, MessageSource messageSource,
 			ClientDetailsService clientDetailsService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.tokenServices = tokenServices;
+		this.messageSource = messageSource;
 		this.clientDetailsService = clientDetailsService;
 	}
 
@@ -95,8 +99,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			// return user to create a response
 			return accessToken.getValue();
 		} else {
-			logger.info("Duplicate user found, exception raised with appropriate HTTP response code.");
-			throw new DuplicateUserException();
+			logger.info(
+					"Duplicate user found: {}, exception raised with appropriate HTTP response code.",
+					username);
+			throw new DuplicateUserException(messageSource.getMessage(
+					"bufanbaby.user.already.exists", null, LocaleContextHolder.getLocale()));
 		}
 	}
 

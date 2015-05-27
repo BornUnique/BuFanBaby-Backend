@@ -6,14 +6,15 @@ import javax.ws.rs.core.Response;
 
 @SuppressWarnings("serial")
 public class GenericWebApplicationException extends WebApplicationException {
-
 	private final int status;
+	private final String errorCode;
 	private final String errorMessage;
 	private final String developerMessage;
 
-	public GenericWebApplicationException(int httpStatus, String errorMessage,
+	public GenericWebApplicationException(int httpStatus, String errorCode, String errorMessage,
 			String developerMessage) {
 		this.status = httpStatus;
+		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
 		this.developerMessage = developerMessage;
 	}
@@ -31,8 +32,9 @@ public class GenericWebApplicationException extends WebApplicationException {
 
 	public ErrorResponse getErrorResponse() {
 		ErrorResponse response = new ErrorResponse();
-		response.setApplicationMessage(developerMessage);
+		response.setErrorCode(errorCode);
 		response.setConsumerMessage(errorMessage);
+		response.setApplicationMessage(developerMessage);
 		return response;
 	}
 }
