@@ -8,6 +8,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+
 import com.bufanbaby.backend.rest.domain.auth.User;
 import com.bufanbaby.backend.rest.exception.UserNotFoundException;
 import com.bufanbaby.backend.rest.resources.AbstractResource;
@@ -17,11 +21,15 @@ import com.bufanbaby.backend.rest.resources.AbstractResource;
 @Consumes({ MediaType.APPLICATION_JSON })
 public class MeResource extends AbstractResource {
 
+	@Autowired
+	private MessageSource messageSource;
+
 	@GET
 	public User getUser(final @Context SecurityContext securityContext) {
 		User currentUser = getCurrentUser(securityContext);
 		if (currentUser == null) {
-			throw new UserNotFoundException();
+			throw new UserNotFoundException(messageSource.getMessage("bufanbaby.user.not.found",
+					null, LocaleContextHolder.getLocale()));
 		}
 		return currentUser;
 	}

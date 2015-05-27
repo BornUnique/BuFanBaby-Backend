@@ -18,7 +18,7 @@ import com.bufanbaby.backend.rest.services.moment.MomentService;
 public class MomentServiceImpl implements MomentService {
 	private static final Logger logger = LoggerFactory.getLogger(MomentService.class);
 
-	private MomentRepository momentRepository;
+	private final MomentRepository momentRepository;
 
 	@Autowired
 	public MomentServiceImpl(MomentRepository momentRepository) {

@@ -1,0 +1,10 @@
+BB4001=Unsupported File Type
+BB4002=File Size Over Limit
+BB4003=Uploaded Files Over Limit
+BB4004=User Not Found
+BB4009=User Already Exists
+
+
+BB5001=General Server Failure
+BB5002=Redis Server Failure
+BB5002=File IO Operation Failure
