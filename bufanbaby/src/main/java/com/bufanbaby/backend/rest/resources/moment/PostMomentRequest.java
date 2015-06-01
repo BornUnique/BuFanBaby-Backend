@@ -7,12 +7,15 @@ import com.bufanbaby.backend.rest.domain.moment.Tag;
 
 public class PostMomentRequest {
 
+	@NotNull
 	private String feeling;
 
 	private long epochMilliCreated;
 
 	@NotNull
 	private ShareScope shareScope;
+
+	private String location;
 
 	@NotNull
 	private Tag tag;
@@ -49,11 +52,12 @@ public class PostMomentRequest {
 		this.tag = tag;
 	}
 
-	@Override
-	public String toString() {
-		return String.format(
-				"PostMomentRequest [feeling=%s, epochMilliCreated=%s, shareScope=%s, tag=%s]",
-				feeling, epochMilliCreated, shareScope, tag);
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 
 }

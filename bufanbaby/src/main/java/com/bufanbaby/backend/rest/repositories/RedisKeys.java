@@ -1,5 +1,8 @@
 package com.bufanbaby.backend.rest.repositories;
 
+/**
+ * The keys are used to manipulate the data in Redis.
+ */
 public abstract class RedisKeys {
 
 	public static final String UID = "uid:";

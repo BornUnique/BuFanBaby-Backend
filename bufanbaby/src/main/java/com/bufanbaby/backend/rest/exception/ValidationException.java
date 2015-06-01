@@ -9,26 +9,19 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.bufanbaby.backend.rest.exception.ErrorResponse.ErrorCode;
+
 @SuppressWarnings("serial")
 public class ValidationException extends WebApplicationException {
 
 	private final static int status = 400;
 	private final String errorMessage;
-	private String developerMessage;
 	private final List<Violation> violations = new ArrayList<Violation>();
 
-	public ValidationException() {
-		errorMessage = "Validation Error";
-		developerMessage = "The data passed in the request was invalid. Please check and resubmit";
-	}
+	public ValidationException(String errorMessage,
+			Set<? extends ConstraintViolation<?>> constraintViolations) {
+		this.errorMessage = errorMessage;
 
-	public ValidationException(String message) {
-		super();
-		errorMessage = message;
-	}
-
-	public ValidationException(Set<? extends ConstraintViolation<?>> constraintViolations) {
-		this();
 		for (ConstraintViolation<?> constraintViolation : constraintViolations) {
 			Violation violation = new Violation();
 			violation.setMessage(constraintViolation.getMessage());
@@ -49,7 +42,8 @@ public class ValidationException extends WebApplicationException {
 
 	public ValidationErrorResponse getViolationResponse() {
 		ValidationErrorResponse response = new ValidationErrorResponse();
-		response.setApplicationMessage(developerMessage);
+		response.setErrorCode(ErrorCode.REQUEST_VALIDATION_ERROR.code);
+		response.setApplicationMessage(ErrorCode.REQUEST_VALIDATION_ERROR.developerMsg);
 		response.setConsumerMessage(errorMessage);
 		response.setViolations(violations);
 		return response;

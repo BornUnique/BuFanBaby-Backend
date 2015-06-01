@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,19 +26,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Component;
 
 import com.bufanbaby.backend.rest.config.AppProperties;
 import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
 import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
 import com.bufanbaby.backend.rest.domain.moment.Moment;
-import com.bufanbaby.backend.rest.domain.moment.Tag;
 import com.bufanbaby.backend.rest.exception.FileIOException;
 import com.bufanbaby.backend.rest.exception.UnsupportedFileTypeException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
 import com.bufanbaby.backend.rest.services.moment.MomentService;
+import com.bufanbaby.backend.rest.services.validation.RequestBeanValidator;
 
-@Component
 @Path("{userId}/moments")
 public class MomentsResource {
 	private static final Logger logger = LoggerFactory.getLogger(MomentsResource.class);
@@ -47,95 +44,94 @@ public class MomentsResource {
 	private final AppProperties appProperties;
 	private final MomentService momentService;
 	private final MessageSource messageSource;
+	private final RequestBeanValidator requestBeanValidator;
 
 	@Autowired
 	public MomentsResource(AppProperties appProperties, MomentService momentService,
-			MessageSource messageSource) {
+			MessageSource messageSource, RequestBeanValidator requestBeanValidator) {
 		this.appProperties = appProperties;
 		this.momentService = momentService;
 		this.messageSource = messageSource;
+		this.requestBeanValidator = requestBeanValidator;
 	}
 
-	// TODO: need pass JSON from client side
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response postMoments(
 			@Context UriInfo uriInfo,
 			@PathParam("userId") String userId,
-			@FormDataParam("comment") String comment,
-			@FormDataParam("ownerTag") String ownerTag,
-			@FormDataParam("spouseTag") String spouseTag,
-			@FormDataParam("childrenTag") List<String> childrenTags,
-			@FormDataParam("file") List<FormDataBodyPart> files) {
+			@FormDataParam("moment") PostMomentRequest momentRequest,
+			@FormDataParam("files") List<FormDataBodyPart> files) {
 
-		// Check total files if over limit
-		int size = files.size();
-		if (size > appProperties.getMaxFilesPerUpload()) {
-			logger.warn("Detected uploaded files: {} over limit, user id: {}", size, userId);
-			throw new UploadedFilesOverLimitException(messageSource.getMessage(
-					"bufanbaby.uploaded.files.over.limit",
-					new Integer[] { appProperties.getMaxFilesPerUpload() },
-					LocaleContextHolder.getLocale()));
-		}
-
-		// Check media type to avoid attack
-		for (FormDataBodyPart formDataBodyPart : files) {
-			ContentDisposition contentDisposition = formDataBodyPart.getContentDisposition();
-			MediaType mediaType = formDataBodyPart.getMediaType();
-
-			if (!isMediaTypeAllowed(mediaType)) {
-				logger.warn("Detected unsupported media type: {}, user id: {}, file name: {}",
-						mediaType, userId, contentDisposition.getFileName());
-				throw new UnsupportedFileTypeException(messageSource.getMessage(
-						"bufanbaby.unsupported.file.type",
-						null, LocaleContextHolder.getLocale()));
-			}
-		}
-
-		// Save uploaded file
-		List<FileMetadata> fileMetadatas = new ArrayList<FileMetadata>(size);
-		for (FormDataBodyPart formDataBodyPart : files) {
-			ContentDisposition disposition = formDataBodyPart.getContentDisposition();
-			MediaType mediaType = formDataBodyPart.getMediaType();
-			long maxBytesPerUploadedFile = appProperties.getMaxBytesPerMediaType(mediaType);
-
-			// save the file
-			String parentDir = appProperties.getParentDirectory(mediaType, userId);
-			createParentDirectories(parentDir);
-			String destPath = appProperties.getUploadedFileDestPath(mediaType, parentDir);
-			saveUploadedFile(formDataBodyPart, maxBytesPerUploadedFile, destPath);
-
-			// create file metadata
-			FileMetadata fileMetadata = new FileMetadata();
-			String originalName = disposition.getFileName();
-			fileMetadata.setOriginalName(originalName);
-			fileMetadata.setOriginalCreatedTime(0);
-			fileMetadata.setGeneratedName(null);
-			String relativePath = null;
-			fileMetadata.setRelativePath(relativePath);
-			fileMetadata.setMediaType(mediaType.toString());
-
-			fileMetadatas.add(fileMetadata);
-		}
-
-		// Create the Moment
-		Tag tag = new Tag();
-		tag.setOwnerTag(ownerTag);
-		tag.setSpouseTag(spouseTag);
-		tag.setChildrenTags(childrenTags);
+		requestBeanValidator.validate(momentRequest);
 
 		Moment moment = new Moment();
-		moment.setMessage(comment);
-		moment.setEpochMilliCreated(Instant.now().toEpochMilli());
+		moment.setEpochMilliCreated(momentRequest.getEpochMilliCreated());
+		moment.setFeeling(momentRequest.getFeeling());
+		moment.setShareScope(momentRequest.getShareScope());
+		moment.setTag(momentRequest.getTag());
 		moment.setUserId(Long.parseLong(userId));
-		moment.setFileMetadatas(fileMetadatas);
-		moment.setTag(tag);
-		//
-		// // Save the moment
-		// momentService.save(moment);
 
-		// TODO: after saved in Redis then get an id
+		// Check total files if over limit
+		if (files != null) {
+			int size = files.size();
+			if (size > appProperties.getMaxFilesPerUpload()) {
+				logger.warn("Detected uploaded files: {} over limit, user id: {}", size, userId);
+				throw new UploadedFilesOverLimitException(messageSource.getMessage(
+						"bufanbaby.uploaded.files.over.limit",
+						new Integer[] { appProperties.getMaxFilesPerUpload() },
+						LocaleContextHolder.getLocale()));
+			}
+
+			// Check media type to avoid attack
+			for (FormDataBodyPart formDataBodyPart : files) {
+				ContentDisposition contentDisposition = formDataBodyPart.getContentDisposition();
+				MediaType mediaType = formDataBodyPart.getMediaType();
+
+				if (!isMediaTypeAllowed(mediaType)) {
+					logger.warn("Detected unsupported media type: {}, user id: {}, file name: {}",
+							mediaType, userId, contentDisposition.getFileName());
+					throw new UnsupportedFileTypeException(messageSource.getMessage(
+							"bufanbaby.unsupported.file.type",
+							null, LocaleContextHolder.getLocale()));
+				}
+			}
+
+			// Save uploaded file
+			List<FileMetadata> fileMetadatas = new ArrayList<FileMetadata>(size);
+			for (FormDataBodyPart formDataBodyPart : files) {
+				ContentDisposition disposition = formDataBodyPart.getContentDisposition();
+				MediaType mediaType = formDataBodyPart.getMediaType();
+				long maxBytesPerUploadedFile = appProperties.getMaxBytesPerMediaType(mediaType);
+
+				// save the file
+				// D:/moments/images/{userId}/2015/05/20
+				String parentDir = appProperties.getParentDirectory(mediaType, userId);
+				createParentDirectories(parentDir);
+
+				// D:/moments/images/{userId}/2015/05/20/{currentmillis}.gif
+				String destPath = appProperties.getUploadedFileDestPath(mediaType, parentDir);
+				saveUploadedFile(formDataBodyPart, maxBytesPerUploadedFile, destPath);
+
+				String relativePath = appProperties.getRelativeDirectory(mediaType, destPath);
+
+				// create file metadata
+				FileMetadata fileMetadata = new FileMetadata();
+				fileMetadata.setOriginalName(disposition.getFileName());
+				fileMetadata.setRelativePath(relativePath);
+				fileMetadata.setMediaType(mediaType.toString());
+
+				fileMetadatas.add(fileMetadata);
+			}
+
+			moment.setTotalAttachedFiles(size);
+			moment.setFileMetadatas(fileMetadatas);
+		}
+
+		// Save the moment
+		momentService.save(moment);
+
 		String momentId = "9999";
 
 		// Return response based on Post semantic

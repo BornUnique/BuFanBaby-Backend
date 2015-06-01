@@ -58,7 +58,8 @@ public class AppProperties {
 	}
 
 	/**
-	 * Get the parent directory for the uploaded file.
+	 * Get the parent directory for the uploaded file using the pattern:
+	 * D:/moments/images/{userId}/2015/05/20
 	 * 
 	 * @param mediaType
 	 *            the media type of the uploaded file
@@ -88,8 +89,34 @@ public class AppProperties {
 	}
 
 	/**
+	 * Get the relative path which returns to the client used to form the url
+	 * for the stored files using the pattern:
+	 * images/{userId}/2015/05/20/{currentmillis}.gif
+	 * 
+	 * @param mediaType
+	 *            the media type
+	 * @param fullPath
+	 *            the full path
+	 * @return the relative path
+	 */
+	public String getRelativeDirectory(MediaType mediaType, String fullPath) {
+		String match = null;
+		if (isDocumentType(mediaType)) {
+			match = Directory.DOCUMENTS.name;
+		} else if (isImageType(mediaType)) {
+			match = Directory.IMAGES.name;
+		} else if (isAudioType(mediaType)) {
+			match = Directory.AUDIOS.name;
+		} else {
+			match = Directory.VIDEOS.name;
+		}
+
+		return fullPath.substring(fullPath.toLowerCase().lastIndexOf(match));
+	}
+
+	/**
 	 * Generate the destination path for the uploaded file using the pattern:
-	 * D:/moments/documents/{userId}/2015/05/20/{currentmillis}.gif
+	 * D:/moments/images/{userId}/2015/05/20/{currentmillis}.gif
 	 * 
 	 * @param mediaType
 	 *            the media type of the uploaded file
@@ -173,6 +200,22 @@ public class AppProperties {
 	@Value("${bufanbaby.uploaded.files.video.path}")
 	public void setUploadedVideosPath(String uploadedVideosPath) {
 		this.uploadedVideosPath = uploadedVideosPath;
+	}
+
+	public String getUploadedDocumentsPath() {
+		return uploadedDocumentsPath;
+	}
+
+	public String getUploadedImagesPath() {
+		return uploadedImagesPath;
+	}
+
+	public String getUploadedAudiosPath() {
+		return uploadedAudiosPath;
+	}
+
+	public String getUploadedVideosPath() {
+		return uploadedVideosPath;
 	}
 
 	private boolean isAudioType(MediaType mediaType) {

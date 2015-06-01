@@ -11,8 +11,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.springframework.stereotype.Component;
 
-import com.bufanbaby.backend.rest.exception.mapper.ThrowableMapper;
 import com.bufanbaby.backend.rest.exception.mapper.DataAccessExceptionMapper;
+import com.bufanbaby.backend.rest.exception.mapper.ThrowableMapper;
 
 /**
  * This is the bootstrap class for Jersey application. Spring component

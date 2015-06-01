@@ -99,4 +99,11 @@ public class AppPropertiesTest {
 				getFileParentPath(videosPath)), containsString("mpeg"));
 	}
 
+	@Test
+	public void testGetRelativeDirectory() {
+		String fullPath = "D:/moments/images/1234/2015/05/30/1433032168506.jpg";
+		assertThat(properties.getRelativeDirectory(MediaTypes.JPG.getMediaType(), fullPath),
+				equalTo("images/1234/2015/05/30/1433032168506.jpg"));
+	}
+
 }

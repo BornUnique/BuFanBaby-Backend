@@ -15,9 +15,15 @@ public class Moment {
 	private long userId;
 
 	/**
-	 * The message content
+	 * The client type of the user when posting this moment. For example:
+	 * Android, IOS, Chrome or FireFox etc.
 	 */
-	private String message;
+	private String clientType;
+
+	/**
+	 * The feeling when capturing this moment
+	 */
+	private String feeling;
 
 	/**
 	 * The epoch millisecond of the created time
@@ -30,24 +36,19 @@ public class Moment {
 	private long epochMilliModified;
 
 	/**
-	 * Keep it private
+	 * The shared scope
 	 */
-	private boolean privateScope = true;
-
-	/**
-	 * Share it to friend
-	 */
-	private boolean friendScope = false;
-
-	/**
-	 * Share it to world
-	 */
-	private boolean worldScope = false;
+	private ShareScope shareScope;
 
 	/**
 	 * The tags of the current comment
 	 */
 	private Tag tag;
+
+	/**
+	 * The attached files belong to this moment
+	 */
+	private int totalAttachedFiles;
 
 	/**
 	 * The list of uploaded file metadata
@@ -71,12 +72,12 @@ public class Moment {
 		this.id = id;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getFeeling() {
+		return feeling;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setFeeling(String feeling) {
+		this.feeling = feeling;
 	}
 
 	public List<FileMetadata> getFileMetadatas() {
@@ -127,28 +128,12 @@ public class Moment {
 		this.timlines = timlines;
 	}
 
-	public boolean isPrivateScope() {
-		return privateScope;
+	public ShareScope getShareScope() {
+		return shareScope;
 	}
 
-	public void setPrivateScope(boolean privateScope) {
-		this.privateScope = privateScope;
-	}
-
-	public boolean isFriendScope() {
-		return friendScope;
-	}
-
-	public void setFriendScope(boolean friendScope) {
-		this.friendScope = friendScope;
-	}
-
-	public boolean isWorldScope() {
-		return worldScope;
-	}
-
-	public void setWorldScope(boolean worldScope) {
-		this.worldScope = worldScope;
+	public void setShareScope(ShareScope shareScope) {
+		this.shareScope = shareScope;
 	}
 
 	public List<Comment> getComments() {
@@ -157,5 +142,29 @@ public class Moment {
 
 	public void setComments(List<Comment> comments) {
 		this.comments = comments;
+	}
+
+	public int getTotalAttachedFiles() {
+		return totalAttachedFiles;
+	}
+
+	public void setTotalAttachedFiles(int totalAttachedFiles) {
+		this.totalAttachedFiles = totalAttachedFiles;
+	}
+
+	public String getClientType() {
+		return clientType;
+	}
+
+	public void setClientType(String clientType) {
+		this.clientType = clientType;
+	}
+
+	@Override
+	public String toString() {
+		return String
+				.format("Moment [id=%s, userId=%s, clientType=%s, feeling=%s, epochMilliCreated=%s, epochMilliModified=%s, shareScope=%s, tag=%s, totalAttachedFiles=%s, fileMetadatas=%s, timlines=%s, comments=%s]",
+						id, userId, clientType, feeling, epochMilliCreated, epochMilliModified,
+						shareScope, tag, totalAttachedFiles, fileMetadatas, timlines, comments);
 	}
 }

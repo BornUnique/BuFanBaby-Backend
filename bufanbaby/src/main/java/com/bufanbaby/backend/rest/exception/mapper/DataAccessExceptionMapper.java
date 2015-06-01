@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 
 import com.bufanbaby.backend.rest.exception.ErrorResponse;
+import com.bufanbaby.backend.rest.exception.ErrorResponse.ErrorCode;
 
 @Provider
 public class DataAccessExceptionMapper implements ExceptionMapper<DataAccessException> {
@@ -20,9 +21,9 @@ public class DataAccessExceptionMapper implements ExceptionMapper<DataAccessExce
 		logger.error("Caught Redis Server Failure", ex);
 
 		ErrorResponse response = new ErrorResponse();
-		response.setErrorCode("BB5002");
-		response.setApplicationMessage("Redis Server Failure: please check if Redis is working");
-		response.setConsumerMessage("Server Failure: try it again or contact Administrator");
+		response.setErrorCode(ErrorCode.INTERNAL_REDIS_SERVER_FAILURE.code);
+		response.setApplicationMessage(ErrorCode.INTERNAL_REDIS_SERVER_FAILURE.developerMsg);
+		response.setConsumerMessage("Internal Server Failure: try it again or contact Administrator");
 
 		return Response.status(500)
 				.type(MediaType.APPLICATION_JSON_TYPE)

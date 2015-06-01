@@ -3,20 +3,9 @@ package com.bufanbaby.backend.rest.domain.moment;
 public class FileMetadata {
 
 	/**
-	 * The original created time of this file and it is interesting to keep the
-	 * file (photo, audio and video) taken-time.
-	 */
-	private long originalCreatedTime;
-
-	/**
 	 * The original file name
 	 */
 	private String originalName;
-
-	/**
-	 * The system generated file name: {epochmillis}.extentsion
-	 */
-	private String generatedName;
 
 	/**
 	 * The relative path to the file stored in the file system and the path
@@ -29,28 +18,12 @@ public class FileMetadata {
 	 */
 	private String mediaType;
 
-	public long getOriginalCreatedTime() {
-		return originalCreatedTime;
-	}
-
-	public void setOriginalCreatedTime(long originalCreatedTime) {
-		this.originalCreatedTime = originalCreatedTime;
-	}
-
 	public String getOriginalName() {
 		return originalName;
 	}
 
 	public void setOriginalName(String originalName) {
 		this.originalName = originalName;
-	}
-
-	public String getGeneratedName() {
-		return generatedName;
-	}
-
-	public void setGeneratedName(String generatedName) {
-		this.generatedName = generatedName;
 	}
 
 	public String getRelativePath() {
@@ -71,8 +44,8 @@ public class FileMetadata {
 
 	@Override
 	public String toString() {
-		return String
-				.format("FileMetadata [originalCreatedTime=%s, originalName=%s, generatedName=%s, relativePath=%s, mediaType=%s]",
-						originalCreatedTime, originalName, generatedName, relativePath, mediaType);
+		return String.format("FileMetadata [originalName=%s, relativePath=%s, mediaType=%s]",
+				originalName, relativePath, mediaType);
 	}
+
 }
