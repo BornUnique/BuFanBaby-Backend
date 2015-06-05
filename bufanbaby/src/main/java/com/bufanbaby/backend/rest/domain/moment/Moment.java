@@ -1,6 +1,7 @@
 package com.bufanbaby.backend.rest.domain.moment;
 
 import java.util.List;
+import java.util.Set;
 
 public class Moment {
 
@@ -15,40 +16,14 @@ public class Moment {
 	private long userId;
 
 	/**
-	 * The client type of the user when posting this moment. For example:
-	 * Android, IOS, Chrome or FireFox etc.
+	 * The details of the moment
 	 */
-	private String clientType;
+	private Content content;
 
 	/**
-	 * The feeling when capturing this moment
+	 * The tags belongs to this moment
 	 */
-	private String feeling;
-
-	/**
-	 * The epoch millisecond of the created time
-	 */
-	private long epochMilliCreated;
-
-	/**
-	 * The epoch millisecond of the modified time
-	 */
-	private long epochMilliModified;
-
-	/**
-	 * The shared scope
-	 */
-	private ShareScope shareScope;
-
-	/**
-	 * The tags of the current comment
-	 */
-	private Tag tag;
-
-	/**
-	 * The attached files belong to this moment
-	 */
-	private int totalAttachedFiles;
+	private Set<String> tags;
 
 	/**
 	 * The list of uploaded file metadata
@@ -56,12 +31,8 @@ public class Moment {
 	private List<FileMetadata> fileMetadatas;
 
 	/**
-	 * 1 moment belongs to multiple timelines which matches the tag names. In
-	 * other word, each tag name has its own timeline. But the owner has all of
-	 * the moments.
+	 * Comments belong to this moment
 	 */
-	private List<Timeline> timlines;
-
 	private List<Comment> comments;
 
 	public long getId() {
@@ -72,12 +43,28 @@ public class Moment {
 		this.id = id;
 	}
 
-	public String getFeeling() {
-		return feeling;
+	public long getUserId() {
+		return userId;
 	}
 
-	public void setFeeling(String feeling) {
-		this.feeling = feeling;
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
+	public Content getContent() {
+		return content;
+	}
+
+	public void setContent(Content content) {
+		this.content = content;
+	}
+
+	public Set<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<String> tags) {
+		this.tags = tags;
 	}
 
 	public List<FileMetadata> getFileMetadatas() {
@@ -88,54 +75,6 @@ public class Moment {
 		this.fileMetadatas = fileMetadatas;
 	}
 
-	public long getEpochMilliCreated() {
-		return epochMilliCreated;
-	}
-
-	public void setEpochMilliCreated(long epochMilliCreated) {
-		this.epochMilliCreated = epochMilliCreated;
-	}
-
-	public long getEpochMilliModified() {
-		return epochMilliModified;
-	}
-
-	public void setEpochMilliModified(long epochMilliModified) {
-		this.epochMilliModified = epochMilliModified;
-	}
-
-	public Tag getTag() {
-		return tag;
-	}
-
-	public void setTag(Tag tag) {
-		this.tag = tag;
-	}
-
-	public long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
-
-	public List<Timeline> getTimlines() {
-		return timlines;
-	}
-
-	public void setTimlines(List<Timeline> timlines) {
-		this.timlines = timlines;
-	}
-
-	public ShareScope getShareScope() {
-		return shareScope;
-	}
-
-	public void setShareScope(ShareScope shareScope) {
-		this.shareScope = shareScope;
-	}
-
 	public List<Comment> getComments() {
 		return comments;
 	}
@@ -144,27 +83,11 @@ public class Moment {
 		this.comments = comments;
 	}
 
-	public int getTotalAttachedFiles() {
-		return totalAttachedFiles;
-	}
-
-	public void setTotalAttachedFiles(int totalAttachedFiles) {
-		this.totalAttachedFiles = totalAttachedFiles;
-	}
-
-	public String getClientType() {
-		return clientType;
-	}
-
-	public void setClientType(String clientType) {
-		this.clientType = clientType;
-	}
-
 	@Override
 	public String toString() {
-		return String
-				.format("Moment [id=%s, userId=%s, clientType=%s, feeling=%s, epochMilliCreated=%s, epochMilliModified=%s, shareScope=%s, tag=%s, totalAttachedFiles=%s, fileMetadatas=%s, timlines=%s, comments=%s]",
-						id, userId, clientType, feeling, epochMilliCreated, epochMilliModified,
-						shareScope, tag, totalAttachedFiles, fileMetadatas, timlines, comments);
+		return String.format(
+				"Moment [id=%s, userId=%s, content=%s, tags=%s, fileMetadatas=%s, comments=%s]",
+				id, userId, content, tags, fileMetadatas, comments);
 	}
+
 }

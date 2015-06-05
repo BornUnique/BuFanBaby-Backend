@@ -4,6 +4,8 @@ buildscript {
         springSecurityOAuth2Version = '2.0.7.RELEASE'
         jerseyVersion = '2.14'
         //jedisRedisClientsVersion = '2.7.2'
+        uadetectorResourceVersion = '2014.04'
+        commonsLangVersion = '3.4'
     }
     repositories {
         mavenCentral()
@@ -61,6 +63,8 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-security")
     compile("org.springframework.security.oauth:spring-security-oauth2:${springSecurityOAuth2Version}")
     //compile("redis.clients:jedis:${jedisRedisClientsVersion}")
+    compile("net.sf.uadetector:uadetector-resources:${uadetectorResourceVersion}")
+    compile("org.apache.commons:commons-lang3:${commonsLangVersion}")
     compile("com.google.guava:guava:18.0")
     //compile("org.springframework.boot:spring-boot-starter-velocity")
     compile("org.springframework.boot:spring-boot-starter-web")

@@ -11,12 +11,12 @@ public class FileMetadata {
 	 * The relative path to the file stored in the file system and the path
 	 * separator is forward slash
 	 */
-	private String relativePath;
+	private String originalFilePath;
 
 	/**
-	 * The media type of the file
+	 * The path of thumbnail
 	 */
-	private String mediaType;
+	private String thumbnailFilePath;
 
 	public String getOriginalName() {
 		return originalName;
@@ -26,26 +26,27 @@ public class FileMetadata {
 		this.originalName = originalName;
 	}
 
-	public String getRelativePath() {
-		return relativePath;
+	public String getOriginalFilePath() {
+		return originalFilePath;
 	}
 
-	public void setRelativePath(String relativePath) {
-		this.relativePath = relativePath;
+	public void setOriginalFilePath(String originalFilePath) {
+		this.originalFilePath = originalFilePath;
 	}
 
-	public String getMediaType() {
-		return mediaType;
+	public String getThumbnailFilePath() {
+		return thumbnailFilePath;
 	}
 
-	public void setMediaType(String mediaType) {
-		this.mediaType = mediaType;
+	public void setThumbnailFilePath(String thumbnailFilePath) {
+		this.thumbnailFilePath = thumbnailFilePath;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("FileMetadata [originalName=%s, relativePath=%s, mediaType=%s]",
-				originalName, relativePath, mediaType);
+		return String.format(
+				"FileMetadata [originalName=%s, originalFilePath=%s, thumbnailFilePath=%s]",
+				originalName, originalFilePath, thumbnailFilePath);
 	}
 
 }

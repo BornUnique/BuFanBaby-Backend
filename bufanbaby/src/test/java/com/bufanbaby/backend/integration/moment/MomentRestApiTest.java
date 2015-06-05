@@ -1,5 +1,6 @@
 package com.bufanbaby.backend.integration.moment;
 
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -10,9 +11,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
@@ -32,16 +34,23 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bufanbaby.backend.rest.domain.moment.ShareScope;
-import com.bufanbaby.backend.rest.domain.moment.Tag;
+import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
+import com.bufanbaby.backend.rest.domain.moment.ShareWith;
 import com.bufanbaby.backend.rest.exception.ErrorResponse;
 import com.bufanbaby.backend.rest.exception.ValidationErrorResponse;
 import com.bufanbaby.backend.rest.resources.moment.PostMomentRequest;
+import com.bufanbaby.backend.rest.resources.moment.PostMomentResponse;
 
 public class MomentRestApiTest {
 	private final static Logger logger = Logger.getLogger(MomentRestApiTest.class.getName());
+
+	private final static String Footprint_Image_Name = "footprint-150x150.jpg";
+	private final static String Smile_Image_Name = "smile.jpg";
+
 	private WebTarget rootTarget;
 	private WebTarget momentTarget;
+	private URI rootUri;
+	private int userId;
 
 	@Before
 	public void setUp() throws Exception {
@@ -52,17 +61,19 @@ public class MomentRestApiTest {
 
 		Client client = ClientBuilder.newClient(clientConfig);
 
-		URI uri = UriBuilder.fromUri("http://{host}:{port}/{path}")
+		rootUri = UriBuilder.fromUri("http://{host}:{port}/{path}")
 				.resolveTemplate("host", "localhost")
 				.resolveTemplate("port", 8080)
 				.resolveTemplate("path", "v1.0")
 				.build();
 
-		rootTarget = client.target(uri);
+		rootTarget = client.target(rootUri);
+
+		userId = new Random().nextInt(31);
 
 		momentTarget = rootTarget
 				.path("{userId}/moments")
-				.resolveTemplate("userId", new Random().nextInt(31));
+				.resolveTemplate("userId", userId);
 	}
 
 	@Test
@@ -81,7 +92,15 @@ public class MomentRestApiTest {
 				equalTo(Response.Status.CREATED.getReasonPhrase()));
 		assertThat(response.getLocation(), is(notNullValue()));
 
-		// check response entity
+		PostMomentResponse momentResponse = response.readEntity(PostMomentResponse.class);
+
+		assertThat(momentResponse.getSelf(), equalTo(response.getLocation()));
+
+		List<FileMetadata> fileMetadatas = momentResponse.getFileMetadatas();
+		for (FileMetadata fileMetadata : fileMetadatas) {
+			assertThat(fileMetadata.getOriginalName(),
+					is(anyOf(equalTo(Footprint_Image_Name), equalTo(Smile_Image_Name))));
+		}
 	}
 
 	@Test
@@ -131,7 +150,7 @@ public class MomentRestApiTest {
 				equalTo(ErrorResponse.ErrorCode.REQUEST_VALIDATION_ERROR.code));
 
 		// missing feeling, tag, shared scope
-		assertThat(errorResponse.getViolations().size(), equalTo(3));
+		assertThat(errorResponse.getViolations().size(), equalTo(2));
 	}
 
 	/**
@@ -143,24 +162,21 @@ public class MomentRestApiTest {
 	 */
 	@SuppressWarnings("resource")
 	private FormDataMultiPart setupFormDataMultipart(boolean uploadedFilsOverLimit,
-			boolean triggerValidationError)
-			throws URISyntaxException {
+			boolean triggerValidationError) throws URISyntaxException {
+
 		PostMomentRequest momentRequest = new PostMomentRequest();
-		momentRequest.setEpochMilliCreated(Instant.now().toEpochMilli());
+		momentRequest.setTimeCreated(Instant.now().toEpochMilli());
 		if (!triggerValidationError) {
 			momentRequest.setFeeling("This is the first unique moment which makes excited!!!"
 					+ " 这是第一个不凡时刻， 它让我无比兴奋！");
-			momentRequest.setShareScope(ShareScope.PRIVATE);
-			Tag tag = new Tag();
-			tag.setOwnerTag("Kaiqin");
-			tag.setSpouseTag("Laiyan");
+			momentRequest.setShareWith(ShareWith.JUST_ME);
 
-			List<String> childrenTags = new ArrayList<String>(2);
-			childrenTags.add("Angie");
-			childrenTags.add("Sydney");
-			tag.setChildrenTags(childrenTags);
-
-			momentRequest.setTag(tag);
+			Set<String> tags = new HashSet<>();
+			tags.add("Kaiqin");
+			tags.add("Laiyan");
+			tags.add("Angie");
+			tags.add("Sydney");
+			momentRequest.setTags(tags);
 		}
 
 		FormDataMultiPart multipart = new FormDataMultiPart()
@@ -172,10 +188,10 @@ public class MomentRestApiTest {
 		}
 
 		for (int i = 0; i < max; i++) {
-			URL url1 = this.getClass().getResource("footprint-150x150.jpg");
+			URL url1 = this.getClass().getResource(Footprint_Image_Name);
 			FileDataBodyPart filePart1 = new FileDataBodyPart("files", new File(url1.toURI()));
 
-			URL url2 = this.getClass().getResource("smile.jpg");
+			URL url2 = this.getClass().getResource(Smile_Image_Name);
 			FileDataBodyPart filePart2 = new FileDataBodyPart("files", new File(url2.toURI()));
 
 			multipart.bodyPart(filePart1);

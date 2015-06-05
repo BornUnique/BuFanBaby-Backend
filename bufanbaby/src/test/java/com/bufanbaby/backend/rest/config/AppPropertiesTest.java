@@ -27,7 +27,7 @@ public class AppPropertiesTest {
 	private long maxBytesAudio = 30000;
 	private long maxBytesVideo = 40000;
 
-	private String userId = "1234";
+	private long userId = 1234;
 
 	@Before
 	public void setUp() throws Exception {

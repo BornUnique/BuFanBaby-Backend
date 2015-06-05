@@ -5,7 +5,6 @@ import static com.bufanbaby.backend.rest.domain.moment.Symbols.FORWARD_SLASH;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -13,6 +12,7 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -67,7 +67,7 @@ public class AppProperties {
 	 *            the user id used as part of the path
 	 * @return the path string
 	 */
-	public String getParentDirectory(MediaType mediaType, String userId) {
+	public String getParentDirectory(MediaType mediaType, long userId) {
 		StringBuilder sb = new StringBuilder();
 
 		if (isDocumentType(mediaType)) {
@@ -125,7 +125,7 @@ public class AppProperties {
 	 * @return the full path for saving the uploaded file
 	 */
 	public String getUploadedFileDestPath(MediaType mediaType, String parentDir) {
-		String newFileName = String.valueOf(Instant.now().toEpochMilli());
+		String newFileName = String.valueOf(RandomStringUtils.randomAlphanumeric(12));
 		return new StringBuilder()
 				.append(parentDir)
 				.append(FORWARD_SLASH.symbol)

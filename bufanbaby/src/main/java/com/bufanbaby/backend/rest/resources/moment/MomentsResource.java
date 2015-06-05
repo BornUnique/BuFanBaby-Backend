@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -17,6 +18,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import net.sf.uadetector.ReadableUserAgent;
+import net.sf.uadetector.UserAgentStringParser;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -28,9 +32,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import com.bufanbaby.backend.rest.config.AppProperties;
+import com.bufanbaby.backend.rest.domain.moment.Content;
 import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
 import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
 import com.bufanbaby.backend.rest.domain.moment.Moment;
+import com.bufanbaby.backend.rest.domain.moment.ShareWith;
 import com.bufanbaby.backend.rest.exception.FileIOException;
 import com.bufanbaby.backend.rest.exception.UnsupportedFileTypeException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
@@ -45,14 +51,17 @@ public class MomentsResource {
 	private final MomentService momentService;
 	private final MessageSource messageSource;
 	private final RequestBeanValidator requestBeanValidator;
+	private final UserAgentStringParser userAgentStringParser;
 
 	@Autowired
 	public MomentsResource(AppProperties appProperties, MomentService momentService,
-			MessageSource messageSource, RequestBeanValidator requestBeanValidator) {
+			MessageSource messageSource, RequestBeanValidator requestBeanValidator,
+			UserAgentStringParser userAgentStringParser) {
 		this.appProperties = appProperties;
 		this.momentService = momentService;
 		this.messageSource = messageSource;
 		this.requestBeanValidator = requestBeanValidator;
+		this.userAgentStringParser = userAgentStringParser;
 	}
 
 	@POST
@@ -60,18 +69,16 @@ public class MomentsResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response postMoments(
 			@Context UriInfo uriInfo,
-			@PathParam("userId") String userId,
-			@FormDataParam("moment") PostMomentRequest momentRequest,
+			@HeaderParam("user-agent") String userAgent,
+			@PathParam("userId") long userId,
+			@FormDataParam("moment") PostMomentRequest request,
 			@FormDataParam("files") List<FormDataBodyPart> files) {
 
-		requestBeanValidator.validate(momentRequest);
+		// validate request parameters
+		requestBeanValidator.validate(request);
 
+		Content content = new Content();
 		Moment moment = new Moment();
-		moment.setEpochMilliCreated(momentRequest.getEpochMilliCreated());
-		moment.setFeeling(momentRequest.getFeeling());
-		moment.setShareScope(momentRequest.getShareScope());
-		moment.setTag(momentRequest.getTag());
-		moment.setUserId(Long.parseLong(userId));
 
 		// Check total files if over limit
 		if (files != null) {
@@ -119,24 +126,48 @@ public class MomentsResource {
 				// create file metadata
 				FileMetadata fileMetadata = new FileMetadata();
 				fileMetadata.setOriginalName(disposition.getFileName());
-				fileMetadata.setRelativePath(relativePath);
-				fileMetadata.setMediaType(mediaType.toString());
+				fileMetadata.setOriginalFilePath(relativePath);
 
+				// TODO: xx_100*100 if >1 or 150X150 if = 1
+				fileMetadata.setThumbnailFilePath("TODO");
 				fileMetadatas.add(fileMetadata);
 			}
 
-			moment.setTotalAttachedFiles(size);
 			moment.setFileMetadatas(fileMetadatas);
+			content.setAttachedFileSize(size);
 		}
 
-		// Save the moment
-		momentService.save(moment);
+		if (userAgent != null) {
+			ReadableUserAgent agent = userAgentStringParser.parse(userAgent);
+			String clientType = agent.getDeviceCategory().getCategory() + ":"
+					+ agent.getOperatingSystem().getFamily() + ":" + agent.getName();
 
-		String momentId = "9999";
+			content.setClientType(clientType);
+		}
+
+		content.setFeeling(request.getFeeling())
+				.setShareWith(ShareWith.JUST_ME)
+				.setTimeCreated(request.getTimeCreated())
+				.setGeographicLocation(request.getGeographicLocation());
+
+		moment.setUserId(userId);
+		moment.setContent(content);
+		moment.setTags(request.getTags());
+
+		// Save the moment
+		moment = momentService.save(moment);
+
+		long momentId = moment.getId();
 
 		// Return response based on Post semantic
-		URI location = uriInfo.getAbsolutePathBuilder().path(momentId).build();
-		return Response.created(location).entity(moment).build();
+		URI location = uriInfo.getAbsolutePathBuilder().path(String.valueOf(momentId)).build();
+
+		PostMomentResponse response = new PostMomentResponse();
+		response.setMomentId(momentId);
+		response.setFileMetadatas(moment.getFileMetadatas());
+		response.setSelf(location);
+
+		return Response.created(location).entity(response).build();
 	}
 
 	/**
