@@ -1,6 +1,7 @@
 package com.bufanbaby.backend.rest.domain.moment;
 
 import java.util.List;
+import java.util.Set;
 
 public class Moment {
 
@@ -15,39 +16,14 @@ public class Moment {
 	private long userId;
 
 	/**
-	 * The message content
+	 * The details of the moment
 	 */
-	private String message;
+	private Content content;
 
 	/**
-	 * The epoch millisecond of the created time
+	 * The tags belongs to this moment
 	 */
-	private long epochMilliCreated;
-
-	/**
-	 * The epoch millisecond of the modified time
-	 */
-	private long epochMilliModified;
-
-	/**
-	 * Keep it private
-	 */
-	private boolean privateScope = true;
-
-	/**
-	 * Share it to friend
-	 */
-	private boolean friendScope = false;
-
-	/**
-	 * Share it to world
-	 */
-	private boolean worldScope = false;
-
-	/**
-	 * The tags of the current comment
-	 */
-	private Tag tag;
+	private Set<String> tags;
 
 	/**
 	 * The list of uploaded file metadata
@@ -55,12 +31,8 @@ public class Moment {
 	private List<FileMetadata> fileMetadatas;
 
 	/**
-	 * 1 moment belongs to multiple timelines which matches the tag names. In
-	 * other word, each tag name has its own timeline. But the owner has all of
-	 * the moments.
+	 * Comments belong to this moment
 	 */
-	private List<Timeline> timlines;
-
 	private List<Comment> comments;
 
 	public long getId() {
@@ -71,12 +43,28 @@ public class Moment {
 		this.id = id;
 	}
 
-	public String getMessage() {
-		return message;
+	public long getUserId() {
+		return userId;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
+	public Content getContent() {
+		return content;
+	}
+
+	public void setContent(Content content) {
+		this.content = content;
+	}
+
+	public Set<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<String> tags) {
+		this.tags = tags;
 	}
 
 	public List<FileMetadata> getFileMetadatas() {
@@ -87,70 +75,6 @@ public class Moment {
 		this.fileMetadatas = fileMetadatas;
 	}
 
-	public long getEpochMilliCreated() {
-		return epochMilliCreated;
-	}
-
-	public void setEpochMilliCreated(long epochMilliCreated) {
-		this.epochMilliCreated = epochMilliCreated;
-	}
-
-	public long getEpochMilliModified() {
-		return epochMilliModified;
-	}
-
-	public void setEpochMilliModified(long epochMilliModified) {
-		this.epochMilliModified = epochMilliModified;
-	}
-
-	public Tag getTag() {
-		return tag;
-	}
-
-	public void setTag(Tag tag) {
-		this.tag = tag;
-	}
-
-	public long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
-
-	public List<Timeline> getTimlines() {
-		return timlines;
-	}
-
-	public void setTimlines(List<Timeline> timlines) {
-		this.timlines = timlines;
-	}
-
-	public boolean isPrivateScope() {
-		return privateScope;
-	}
-
-	public void setPrivateScope(boolean privateScope) {
-		this.privateScope = privateScope;
-	}
-
-	public boolean isFriendScope() {
-		return friendScope;
-	}
-
-	public void setFriendScope(boolean friendScope) {
-		this.friendScope = friendScope;
-	}
-
-	public boolean isWorldScope() {
-		return worldScope;
-	}
-
-	public void setWorldScope(boolean worldScope) {
-		this.worldScope = worldScope;
-	}
-
 	public List<Comment> getComments() {
 		return comments;
 	}
@@ -158,4 +82,12 @@ public class Moment {
 	public void setComments(List<Comment> comments) {
 		this.comments = comments;
 	}
+
+	@Override
+	public String toString() {
+		return String.format(
+				"Moment [id=%s, userId=%s, content=%s, tags=%s, fileMetadatas=%s, comments=%s]",
+				id, userId, content, tags, fileMetadatas, comments);
+	}
+
 }

@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 
 @SuppressWarnings("serial")
 public class GenericWebApplicationException extends WebApplicationException {
+
 	private final int status;
 	private final String errorCode;
 	private final String errorMessage;

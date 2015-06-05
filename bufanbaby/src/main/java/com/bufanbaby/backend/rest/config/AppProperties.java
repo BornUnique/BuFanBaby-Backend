@@ -5,7 +5,6 @@ import static com.bufanbaby.backend.rest.domain.moment.Symbols.FORWARD_SLASH;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -13,6 +12,7 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +58,8 @@ public class AppProperties {
 	}
 
 	/**
-	 * Get the parent directory for the uploaded file.
+	 * Get the parent directory for the uploaded file using the pattern:
+	 * D:/moments/images/{userId}/2015/05/20
 	 * 
 	 * @param mediaType
 	 *            the media type of the uploaded file
@@ -66,7 +67,7 @@ public class AppProperties {
 	 *            the user id used as part of the path
 	 * @return the path string
 	 */
-	public String getParentDirectory(MediaType mediaType, String userId) {
+	public String getParentDirectory(MediaType mediaType, long userId) {
 		StringBuilder sb = new StringBuilder();
 
 		if (isDocumentType(mediaType)) {
@@ -88,8 +89,34 @@ public class AppProperties {
 	}
 
 	/**
+	 * Get the relative path which returns to the client used to form the url
+	 * for the stored files using the pattern:
+	 * images/{userId}/2015/05/20/{currentmillis}.gif
+	 * 
+	 * @param mediaType
+	 *            the media type
+	 * @param fullPath
+	 *            the full path
+	 * @return the relative path
+	 */
+	public String getRelativeDirectory(MediaType mediaType, String fullPath) {
+		String match = null;
+		if (isDocumentType(mediaType)) {
+			match = Directory.DOCUMENTS.name;
+		} else if (isImageType(mediaType)) {
+			match = Directory.IMAGES.name;
+		} else if (isAudioType(mediaType)) {
+			match = Directory.AUDIOS.name;
+		} else {
+			match = Directory.VIDEOS.name;
+		}
+
+		return fullPath.substring(fullPath.toLowerCase().lastIndexOf(match));
+	}
+
+	/**
 	 * Generate the destination path for the uploaded file using the pattern:
-	 * D:/moments/documents/{userId}/2015/05/20/{currentmillis}.gif
+	 * D:/moments/images/{userId}/2015/05/20/{currentmillis}.gif
 	 * 
 	 * @param mediaType
 	 *            the media type of the uploaded file
@@ -98,7 +125,7 @@ public class AppProperties {
 	 * @return the full path for saving the uploaded file
 	 */
 	public String getUploadedFileDestPath(MediaType mediaType, String parentDir) {
-		String newFileName = String.valueOf(Instant.now().toEpochMilli());
+		String newFileName = String.valueOf(RandomStringUtils.randomAlphanumeric(12));
 		return new StringBuilder()
 				.append(parentDir)
 				.append(FORWARD_SLASH.symbol)
@@ -173,6 +200,22 @@ public class AppProperties {
 	@Value("${bufanbaby.uploaded.files.video.path}")
 	public void setUploadedVideosPath(String uploadedVideosPath) {
 		this.uploadedVideosPath = uploadedVideosPath;
+	}
+
+	public String getUploadedDocumentsPath() {
+		return uploadedDocumentsPath;
+	}
+
+	public String getUploadedImagesPath() {
+		return uploadedImagesPath;
+	}
+
+	public String getUploadedAudiosPath() {
+		return uploadedAudiosPath;
+	}
+
+	public String getUploadedVideosPath() {
+		return uploadedVideosPath;
 	}
 
 	private boolean isAudioType(MediaType mediaType) {

@@ -27,7 +27,7 @@ public class AppPropertiesTest {
 	private long maxBytesAudio = 30000;
 	private long maxBytesVideo = 40000;
 
-	private String userId = "1234";
+	private long userId = 1234;
 
 	@Before
 	public void setUp() throws Exception {
@@ -97,6 +97,13 @@ public class AppPropertiesTest {
 				getFileParentPath(audiosPath)), containsString("mp3"));
 		assertThat(properties.getUploadedFileDestPath(MediaTypes.MPEG.getMediaType(),
 				getFileParentPath(videosPath)), containsString("mpeg"));
+	}
+
+	@Test
+	public void testGetRelativeDirectory() {
+		String fullPath = "D:/moments/images/1234/2015/05/30/1433032168506.jpg";
+		assertThat(properties.getRelativeDirectory(MediaTypes.JPG.getMediaType(), fullPath),
+				equalTo("images/1234/2015/05/30/1433032168506.jpg"));
 	}
 
 }

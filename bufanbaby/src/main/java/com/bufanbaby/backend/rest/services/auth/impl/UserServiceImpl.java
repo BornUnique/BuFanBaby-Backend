@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 
 import com.bufanbaby.backend.rest.domain.auth.Role;
 import com.bufanbaby.backend.rest.domain.auth.User;
-import com.bufanbaby.backend.rest.exception.DuplicateUserException;
+import com.bufanbaby.backend.rest.exception.UserAlreadyExistsException;
 import com.bufanbaby.backend.rest.repositories.auth.UserRepository;
 import com.bufanbaby.backend.rest.resources.auth.SignUpRequest;
 import com.bufanbaby.backend.rest.services.auth.UserService;
@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			logger.info(
 					"Duplicate user found: {}, exception raised with appropriate HTTP response code.",
 					username);
-			throw new DuplicateUserException(messageSource.getMessage(
+			throw new UserAlreadyExistsException(messageSource.getMessage(
 					"bufanbaby.user.already.exists", null, LocaleContextHolder.getLocale()));
 		}
 	}

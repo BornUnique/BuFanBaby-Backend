@@ -3,39 +3,20 @@ package com.bufanbaby.backend.rest.domain.moment;
 public class FileMetadata {
 
 	/**
-	 * The original created time of this file and it is interesting to keep the
-	 * file (photo, audio and video) taken-time.
-	 */
-	private long originalCreatedTime;
-
-	/**
 	 * The original file name
 	 */
 	private String originalName;
 
 	/**
-	 * The system generated file name: {epochmillis}.extentsion
-	 */
-	private String generatedName;
-
-	/**
 	 * The relative path to the file stored in the file system and the path
 	 * separator is forward slash
 	 */
-	private String relativePath;
+	private String originalFilePath;
 
 	/**
-	 * The media type of the file
+	 * The path of thumbnail
 	 */
-	private String mediaType;
-
-	public long getOriginalCreatedTime() {
-		return originalCreatedTime;
-	}
-
-	public void setOriginalCreatedTime(long originalCreatedTime) {
-		this.originalCreatedTime = originalCreatedTime;
-	}
+	private String thumbnailFilePath;
 
 	public String getOriginalName() {
 		return originalName;
@@ -45,34 +26,27 @@ public class FileMetadata {
 		this.originalName = originalName;
 	}
 
-	public String getGeneratedName() {
-		return generatedName;
+	public String getOriginalFilePath() {
+		return originalFilePath;
 	}
 
-	public void setGeneratedName(String generatedName) {
-		this.generatedName = generatedName;
+	public void setOriginalFilePath(String originalFilePath) {
+		this.originalFilePath = originalFilePath;
 	}
 
-	public String getRelativePath() {
-		return relativePath;
+	public String getThumbnailFilePath() {
+		return thumbnailFilePath;
 	}
 
-	public void setRelativePath(String relativePath) {
-		this.relativePath = relativePath;
-	}
-
-	public String getMediaType() {
-		return mediaType;
-	}
-
-	public void setMediaType(String mediaType) {
-		this.mediaType = mediaType;
+	public void setThumbnailFilePath(String thumbnailFilePath) {
+		this.thumbnailFilePath = thumbnailFilePath;
 	}
 
 	@Override
 	public String toString() {
-		return String
-				.format("FileMetadata [originalCreatedTime=%s, originalName=%s, generatedName=%s, relativePath=%s, mediaType=%s]",
-						originalCreatedTime, originalName, generatedName, relativePath, mediaType);
+		return String.format(
+				"FileMetadata [originalName=%s, originalFilePath=%s, thumbnailFilePath=%s]",
+				originalName, originalFilePath, thumbnailFilePath);
 	}
+
 }

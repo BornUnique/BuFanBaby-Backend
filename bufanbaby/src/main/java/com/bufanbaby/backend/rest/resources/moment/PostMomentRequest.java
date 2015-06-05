@@ -1,21 +1,55 @@
 package com.bufanbaby.backend.rest.resources.moment;
 
-import javax.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.Set;
 
-import com.bufanbaby.backend.rest.domain.moment.ShareScope;
-import com.bufanbaby.backend.rest.domain.moment.Tag;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.bufanbaby.backend.rest.domain.moment.ShareWith;
 
 public class PostMomentRequest {
 
+	private long timeCreated;
+
+	private String geographicLocation;
+
+	private ShareWith shareWith;
+
+	@NotEmpty
 	private String feeling;
 
-	private long epochMilliCreated;
+	@NotEmpty
+	private Set<String> tags;
 
-	@NotNull
-	private ShareScope shareScope;
+	public long getTimeCreated() {
+		if (timeCreated == 0) {
+			timeCreated = Instant.now().toEpochMilli();
+		}
+		return timeCreated;
+	}
 
-	@NotNull
-	private Tag tag;
+	public void setTimeCreated(long timeCreated) {
+		this.timeCreated = timeCreated;
+	}
+
+	public String getGeographicLocation() {
+		return geographicLocation;
+	}
+
+	public void setGeographicLocation(String geographicLocation) {
+		this.geographicLocation = geographicLocation;
+	}
+
+	public ShareWith getShareWith() {
+		if (shareWith == null) {
+			return ShareWith.JUST_ME;
+		}
+		return shareWith;
+	}
+
+	public void setShareWith(ShareWith shareWith) {
+		this.shareWith = shareWith;
+	}
 
 	public String getFeeling() {
 		return feeling;
@@ -25,35 +59,19 @@ public class PostMomentRequest {
 		this.feeling = feeling;
 	}
 
-	public long getEpochMilliCreated() {
-		return epochMilliCreated;
+	public Set<String> getTags() {
+		return tags;
 	}
 
-	public void setEpochMilliCreated(long epochMilliCreated) {
-		this.epochMilliCreated = epochMilliCreated;
-	}
-
-	public ShareScope getShareScope() {
-		return shareScope;
-	}
-
-	public void setShareScope(ShareScope shareScope) {
-		this.shareScope = shareScope;
-	}
-
-	public Tag getTag() {
-		return tag;
-	}
-
-	public void setTag(Tag tag) {
-		this.tag = tag;
+	public void setTags(Set<String> tags) {
+		this.tags = tags;
 	}
 
 	@Override
 	public String toString() {
-		return String.format(
-				"PostMomentRequest [feeling=%s, epochMilliCreated=%s, shareScope=%s, tag=%s]",
-				feeling, epochMilliCreated, shareScope, tag);
+		return String
+				.format("PostMomentRequest [timeCreated=%s, geographicLocation=%s, shareWith=%s, feeling=%s, tags=%s]",
+						timeCreated, geographicLocation, shareWith, feeling, tags);
 	}
 
 }

@@ -53,6 +53,10 @@ public class MomentServiceImpl implements MomentService {
 		return moment;
 	}
 
+	/**
+	 * The input stream could count the bytes has been read and if the amounts
+	 * exceed the limitation then it will exception.
+	 */
 	private class SizeLimitedInputStream extends InputStream {
 		private long totalBytesRead = 0;
 		private long maxBytesPerUploadedFile = 0;
