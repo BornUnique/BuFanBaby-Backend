@@ -11,6 +11,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.bufanbaby.backend.rest.domain.moment.Symbols;
+import com.bufanbaby.backend.rest.services.config.ConfigService;
 
 @Configuration
 @AutoConfigureAfter(DispatcherServletAutoConfiguration.class)
@@ -23,17 +24,17 @@ public class StaticResourceConfiguration extends WebMvcConfigurerAdapter {
 	private int cachePeriod;
 
 	@Autowired
-	private AppProperties appProperties;
+	private ConfigService configService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		String documentsLocation = File_Schema_Prefix + appProperties.getUploadedDocumentsPath()
+		String documentsLocation = File_Schema_Prefix + configService.getUploadedDocumentsPath()
 				+ Symbols.FORWARD_SLASH.symbol;
-		String imagesLocation = File_Schema_Prefix + appProperties.getUploadedImagesPath()
+		String imagesLocation = File_Schema_Prefix + configService.getUploadedImagesPath()
 				+ Symbols.FORWARD_SLASH.symbol;
-		String audiosLocation = File_Schema_Prefix + appProperties.getUploadedAudiosPath()
+		String audiosLocation = File_Schema_Prefix + configService.getUploadedAudiosPath()
 				+ Symbols.FORWARD_SLASH.symbol;
-		String videosLocation = File_Schema_Prefix + appProperties.getUploadedVideosPath()
+		String videosLocation = File_Schema_Prefix + configService.getUploadedVideosPath()
 				+ Symbols.FORWARD_SLASH.symbol;
 
 		LOG.info("Serving documents from " + documentsLocation);

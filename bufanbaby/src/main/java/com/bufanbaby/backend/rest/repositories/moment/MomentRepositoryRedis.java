@@ -1,8 +1,11 @@
 package com.bufanbaby.backend.rest.repositories.moment;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
@@ -91,6 +94,8 @@ public class MomentRepositoryRedis implements MomentRepository {
 			// TODO: how to push
 		}
 
+		// set
+		// "moments:" + momentId + ":tags" -> {kaiqin, laiyan}
 		Set<String> tags = moment.getTags();
 		setOps.add(Keys.momentIdTagsKey(momentId), tags.toArray(new String[tags.size()]));
 
@@ -111,5 +116,65 @@ public class MomentRepositoryRedis implements MomentRepository {
 		}
 
 		return momentId;
+	}
+
+	@Override
+	public List<Moment> getlatestMoments(long userId, int size) {
+
+		// list
+		// users:{userId}:moments: {momentId, momentId}
+		List<String> momentIds = listOps.range(Keys.userIdMomentsKey(userId), 0, size - 1);
+
+		int momentSize = momentIds.size();
+		if (momentSize > 0) {
+			List<Moment> moments = new ArrayList<Moment>(momentSize);
+
+			Consumer<String> momentConsumer = (String s) -> {
+				long momentId = Long.parseLong(s);
+
+				Moment moment = new Moment();
+				moment.setId(momentId);
+				moment.setUserId(userId);
+
+				// hash
+				// moments:{momentId} -> {feeling:"", timeCreated:""}
+				Map<String, String> contentHash = hashOps.entries(Keys.momentIdKey(momentId));
+				Content content = momentHashMapper.fromHash(contentHash);
+				moment.setContent(content);
+
+				// tags
+				Set<String> tags = setOps.members(Keys.momentIdTagsKey(momentId));
+				moment.setTags(tags);
+
+				// filematedata
+				List<String> imageIds = listOps.range(Keys.momentsIdImagessKey(momentId), 0, -1);
+				int imageSize = imageIds.size();
+				if (imageSize > 0) {
+					List<FileMetadata> fileMetadatas = new ArrayList<>(imageSize);
+
+					Consumer<String> imageConsumer = (String imageId) -> {
+						// image metadata
+						// hash
+						// images:{imageId} -> {name:"", timeCreated:""}
+						Map<String, String> fileMetaHash = hashOps.entries(Keys.imagesIdKey(Long
+								.parseLong(imageId)));
+						FileMetadata fileMetadata = fileMetadataHashMapper.fromHash(fileMetaHash);
+						fileMetadatas.add(fileMetadata);
+					};
+
+					imageIds.stream().forEach(imageConsumer);
+
+					moment.setFileMetadatas(fileMetadatas);
+				}
+
+				moments.add(moment);
+			};
+
+			momentIds.stream().forEach(momentConsumer);
+
+			return moments;
+		}
+
+		return Collections.emptyList();
 	}
 }

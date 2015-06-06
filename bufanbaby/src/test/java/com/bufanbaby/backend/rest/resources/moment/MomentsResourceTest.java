@@ -26,10 +26,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
 
-import com.bufanbaby.backend.rest.config.AppProperties;
 import com.bufanbaby.backend.rest.domain.moment.ShareWith;
 import com.bufanbaby.backend.rest.exception.UnsupportedFileTypeException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
+import com.bufanbaby.backend.rest.services.config.ConfigService;
 import com.bufanbaby.backend.rest.services.moment.MomentService;
 import com.bufanbaby.backend.rest.services.validation.RequestBeanValidator;
 
@@ -42,7 +42,7 @@ public class MomentsResourceTest {
 	private MomentsResource momentResource;
 
 	@Mock
-	private AppProperties appProperties;
+	private ConfigService configService;
 
 	@Mock
 	private MessageSource messageSource;
@@ -73,13 +73,13 @@ public class MomentsResourceTest {
 
 	@Before
 	public void setUp() throws Exception {
-		momentResource = new MomentsResource(appProperties, momentService, messageSource,
+		momentResource = new MomentsResource(configService, momentService, messageSource,
 				requestBeanValidator, userAgentStringParser);
 	}
 
 	@Test
 	public void testPostMomentsShouldThrowExceptionIfUploadedFilesOverLimit() {
-		when(appProperties.getMaxFilesPerUpload()).thenReturn(9);
+		when(configService.getMaxFilesPerUpload()).thenReturn(9);
 		when(files.size()).thenReturn(10);
 		when(messageSource.getMessage("bufanbaby.uploaded.files.over.limit",
 				new Integer[] { 9 }, Locale.getDefault())).thenReturn("");
@@ -93,7 +93,7 @@ public class MomentsResourceTest {
 
 	@Test
 	public void testPostMomentsShouldThrowExceptionIfMediaTypeNotAllowed() {
-		when(appProperties.getMaxFilesPerUpload()).thenReturn(9);
+		when(configService.getMaxFilesPerUpload()).thenReturn(9);
 		when(files.size()).thenReturn(8);
 		when(contentDisposition.getFileName()).thenReturn("file.xml");
 		when(formDataBodyPart.getContentDisposition()).thenReturn(contentDisposition);

@@ -77,30 +77,36 @@ public class MomentRestApiTest {
 	}
 
 	@Test
-	public void testPostMoment() throws URISyntaxException {
+	public void testPostAndGetMoment() throws URISyntaxException {
 		FormDataMultiPart multipart = setupFormDataMultipart(false, false);
 
-		Response response = momentTarget.request()
+		Response postResponse = momentTarget.request()
 				// .header("Accept-Language",
 				// "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4")
 				.post(Entity.entity(multipart, multipart.getMediaType()));
 
 		// check http status code
-		assertThat(response.getStatusInfo().getFamily(), equalTo(Response.Status.Family.SUCCESSFUL));
-		assertThat(response.getStatus(), equalTo(Response.Status.CREATED.getStatusCode()));
-		assertThat(response.getStatusInfo().getReasonPhrase(),
+		assertThat(postResponse.getStatusInfo().getFamily(),
+				equalTo(Response.Status.Family.SUCCESSFUL));
+		assertThat(postResponse.getStatus(), equalTo(Response.Status.CREATED.getStatusCode()));
+		assertThat(postResponse.getStatusInfo().getReasonPhrase(),
 				equalTo(Response.Status.CREATED.getReasonPhrase()));
-		assertThat(response.getLocation(), is(notNullValue()));
+		assertThat(postResponse.getLocation(), is(notNullValue()));
 
-		PostMomentResponse momentResponse = response.readEntity(PostMomentResponse.class);
+		PostMomentResponse momentResponse = postResponse.readEntity(PostMomentResponse.class);
 
-		assertThat(momentResponse.getSelf(), equalTo(response.getLocation()));
+		assertThat(momentResponse.getSelf(), equalTo(postResponse.getLocation()));
 
 		List<FileMetadata> fileMetadatas = momentResponse.getFileMetadatas();
 		for (FileMetadata fileMetadata : fileMetadatas) {
 			assertThat(fileMetadata.getOriginalName(),
 					is(anyOf(equalTo(Footprint_Image_Name), equalTo(Smile_Image_Name))));
 		}
+
+		// momentTarget.queryParam(name, values);
+
+		Response getResponse = momentTarget.request().get();
+		System.out.println(getResponse.readEntity(List.class));
 	}
 
 	@Test

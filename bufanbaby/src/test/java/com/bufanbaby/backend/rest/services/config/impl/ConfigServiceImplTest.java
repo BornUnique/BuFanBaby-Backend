@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.config;
+package com.bufanbaby.backend.rest.services.config.impl;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -13,10 +13,11 @@ import org.junit.Test;
 import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
 import com.bufanbaby.backend.rest.domain.moment.Symbols;
 
-public class AppPropertiesTest {
+public class ConfigServiceImplTest {
+
 	private static final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-	private AppProperties properties;
+	private ConfigServiceImpl configService;
 	private String documentsPath = "D:/moments/documents";
 	private String imagesPath = "D:/moments/images";
 	private String audiosPath = "D:/moments/audios";
@@ -31,53 +32,53 @@ public class AppPropertiesTest {
 
 	@Before
 	public void setUp() throws Exception {
-		properties = new AppProperties();
+		configService = new ConfigServiceImpl();
 
-		properties.setUploadedDocumentsPath(documentsPath);
-		properties.setUploadedImagesPath(imagesPath);
-		properties.setUploadedAudiosPath(audiosPath);
-		properties.setUploadedVideosPath(videosPath);
+		configService.setUploadedDocumentsPath(documentsPath);
+		configService.setUploadedImagesPath(imagesPath);
+		configService.setUploadedAudiosPath(audiosPath);
+		configService.setUploadedVideosPath(videosPath);
 
-		properties.setMaxBytesPerUploadedDocument(maxBytesDocument);
-		properties.setMaxBytesPerUploadedImage(maxBytesImage);
-		properties.setMaxBytesPerUploadedAudio(maxBytesAudio);
-		properties.setMaxBytesPerUploadedVideo(maxBytesVideo);
+		configService.setMaxBytesPerUploadedDocument(maxBytesDocument);
+		configService.setMaxBytesPerUploadedImage(maxBytesImage);
+		configService.setMaxBytesPerUploadedAudio(maxBytesAudio);
+		configService.setMaxBytesPerUploadedVideo(maxBytesVideo);
 	}
 
 	@Test
 	public void testGetMaxBytesPerMediaType() {
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.PDF.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.PDF.getMediaType()),
 				equalTo(maxBytesDocument));
 
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.GIF.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.GIF.getMediaType()),
 				equalTo(maxBytesImage));
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.PNG.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.PNG.getMediaType()),
 				equalTo(maxBytesImage));
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.BMP.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.BMP.getMediaType()),
 				equalTo(maxBytesImage));
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.JPG.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.JPG.getMediaType()),
 				equalTo(maxBytesImage));
 
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.MP3.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.MP3.getMediaType()),
 				equalTo(maxBytesAudio));
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.WAV.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.WAV.getMediaType()),
 				equalTo(maxBytesAudio));
 
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.MPEG.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.MPEG.getMediaType()),
 				equalTo(maxBytesVideo));
-		assertThat(properties.getMaxBytesPerMediaType(MediaTypes.AVI.getMediaType()),
+		assertThat(configService.getMaxBytesPerMediaType(MediaTypes.AVI.getMediaType()),
 				equalTo(maxBytesVideo));
 	}
 
 	@Test
 	public void testGetParentDirectory() {
-		assertThat(properties.getParentDirectory(MediaTypes.GIF.getMediaType(), userId),
+		assertThat(configService.getParentDirectory(MediaTypes.GIF.getMediaType(), userId),
 				equalTo(getFileParentPath(imagesPath)));
 
-		assertThat(properties.getParentDirectory(MediaTypes.MP3.getMediaType(), userId),
+		assertThat(configService.getParentDirectory(MediaTypes.MP3.getMediaType(), userId),
 				equalTo(getFileParentPath(audiosPath)));
 
-		assertThat(properties.getParentDirectory(MediaTypes.MPEG.getMediaType(), userId),
+		assertThat(configService.getParentDirectory(MediaTypes.MPEG.getMediaType(), userId),
 				equalTo(getFileParentPath(videosPath)));
 
 	}
@@ -89,20 +90,20 @@ public class AppPropertiesTest {
 
 	@Test
 	public void testGetUploadedFileDestPath() {
-		assertThat(properties.getUploadedFileDestPath(MediaTypes.PDF.getMediaType(),
+		assertThat(configService.getUploadedFileDestPath(MediaTypes.PDF.getMediaType(),
 				getFileParentPath(documentsPath)), containsString("pdf"));
-		assertThat(properties.getUploadedFileDestPath(MediaTypes.PNG.getMediaType(),
+		assertThat(configService.getUploadedFileDestPath(MediaTypes.PNG.getMediaType(),
 				getFileParentPath(imagesPath)), containsString("png"));
-		assertThat(properties.getUploadedFileDestPath(MediaTypes.MP3.getMediaType(),
+		assertThat(configService.getUploadedFileDestPath(MediaTypes.MP3.getMediaType(),
 				getFileParentPath(audiosPath)), containsString("mp3"));
-		assertThat(properties.getUploadedFileDestPath(MediaTypes.MPEG.getMediaType(),
+		assertThat(configService.getUploadedFileDestPath(MediaTypes.MPEG.getMediaType(),
 				getFileParentPath(videosPath)), containsString("mpeg"));
 	}
 
 	@Test
 	public void testGetRelativeDirectory() {
 		String fullPath = "D:/moments/images/1234/2015/05/30/1433032168506.jpg";
-		assertThat(properties.getRelativeDirectory(MediaTypes.JPG.getMediaType(), fullPath),
+		assertThat(configService.getRelativeDirectory(MediaTypes.JPG.getMediaType(), fullPath),
 				equalTo("images/1234/2015/05/30/1433032168506.jpg"));
 	}
 
