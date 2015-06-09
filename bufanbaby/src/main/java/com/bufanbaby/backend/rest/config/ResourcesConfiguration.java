@@ -9,6 +9,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.bufanbaby.backend.rest.exception.mapper.DataAccessExceptionMapper;
@@ -39,6 +40,9 @@ public class ResourcesConfiguration extends ResourceConfig {
 
 		// register general DataAccessException mapper for Redis
 		register(DataAccessExceptionMapper.class);
+
+		// Spring Security exception mapper
+		register(AccessDeniedException.class);
 
 		// Catch all exception mapper
 		register(ThrowableMapper.class);

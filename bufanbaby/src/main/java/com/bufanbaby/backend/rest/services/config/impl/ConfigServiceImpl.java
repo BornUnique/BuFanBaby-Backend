@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.config;
+package com.bufanbaby.backend.rest.services.config.impl;
 
 import static com.bufanbaby.backend.rest.domain.moment.Symbols.FORWARD_SLASH;
 
@@ -14,15 +14,19 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import com.bufanbaby.backend.rest.domain.moment.Directory;
 import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
+import com.bufanbaby.backend.rest.services.config.ConfigService;
 
-@Component
-public class AppProperties {
+@Service
+public class ConfigServiceImpl implements ConfigService {
 	private static final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
 	private int maxFilesPerUpload;
+
+	private int maxMomentsPerRequest;
 
 	private long maxBytesPerUploadedDocument;
 
@@ -67,6 +71,7 @@ public class AppProperties {
 	 *            the user id used as part of the path
 	 * @return the path string
 	 */
+	@Override
 	public String getParentDirectory(MediaType mediaType, long userId) {
 		StringBuilder sb = new StringBuilder();
 
@@ -99,6 +104,7 @@ public class AppProperties {
 	 *            the full path
 	 * @return the relative path
 	 */
+	@Override
 	public String getRelativeDirectory(MediaType mediaType, String fullPath) {
 		String match = null;
 		if (isDocumentType(mediaType)) {
@@ -124,6 +130,7 @@ public class AppProperties {
 	 *            the parent directory such as: D:/moments/documents
 	 * @return the full path for saving the uploaded file
 	 */
+	@Override
 	public String getUploadedFileDestPath(MediaType mediaType, String parentDir) {
 		String newFileName = String.valueOf(RandomStringUtils.randomAlphanumeric(12));
 		return new StringBuilder()
@@ -141,6 +148,7 @@ public class AppProperties {
 	 *            the file media type
 	 * @return the max bytes allowed
 	 */
+	@Override
 	public long getMaxBytesPerMediaType(MediaType mediaType) {
 		if (isDocumentType(mediaType)) {
 			return maxBytesPerUploadedDocument;
@@ -153,8 +161,14 @@ public class AppProperties {
 		}
 	}
 
+	@Override
 	public int getMaxFilesPerUpload() {
 		return maxFilesPerUpload;
+	}
+
+	@Value("${bufanbaby.max.moments.per.request:25}")
+	public void setMaxMomentsPerRequest(int maxMomentsPerRequest) {
+		this.maxMomentsPerRequest = maxMomentsPerRequest;
 	}
 
 	@Value("${bufanbaby.max.files.per.upload:9}")
@@ -202,20 +216,29 @@ public class AppProperties {
 		this.uploadedVideosPath = uploadedVideosPath;
 	}
 
+	@Override
 	public String getUploadedDocumentsPath() {
 		return uploadedDocumentsPath;
 	}
 
+	@Override
 	public String getUploadedImagesPath() {
 		return uploadedImagesPath;
 	}
 
+	@Override
 	public String getUploadedAudiosPath() {
 		return uploadedAudiosPath;
 	}
 
+	@Override
 	public String getUploadedVideosPath() {
 		return uploadedVideosPath;
+	}
+
+	@Override
+	public int getMaxMomentsPerRequest() {
+		return maxMomentsPerRequest;
 	}
 
 	private boolean isAudioType(MediaType mediaType) {

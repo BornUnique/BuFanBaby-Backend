@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import com.bufanbaby.backend.rest.config.AppProperties;
 import com.bufanbaby.backend.rest.domain.moment.Content;
 import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
 import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
@@ -40,6 +41,7 @@ import com.bufanbaby.backend.rest.domain.moment.ShareWith;
 import com.bufanbaby.backend.rest.exception.FileIOException;
 import com.bufanbaby.backend.rest.exception.UnsupportedFileTypeException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
+import com.bufanbaby.backend.rest.services.config.ConfigService;
 import com.bufanbaby.backend.rest.services.moment.MomentService;
 import com.bufanbaby.backend.rest.services.validation.RequestBeanValidator;
 
@@ -47,17 +49,17 @@ import com.bufanbaby.backend.rest.services.validation.RequestBeanValidator;
 public class MomentsResource {
 	private static final Logger logger = LoggerFactory.getLogger(MomentsResource.class);
 
-	private final AppProperties appProperties;
+	private final ConfigService configService;
 	private final MomentService momentService;
 	private final MessageSource messageSource;
 	private final RequestBeanValidator requestBeanValidator;
 	private final UserAgentStringParser userAgentStringParser;
 
 	@Autowired
-	public MomentsResource(AppProperties appProperties, MomentService momentService,
+	public MomentsResource(ConfigService configService, MomentService momentService,
 			MessageSource messageSource, RequestBeanValidator requestBeanValidator,
 			UserAgentStringParser userAgentStringParser) {
-		this.appProperties = appProperties;
+		this.configService = configService;
 		this.momentService = momentService;
 		this.messageSource = messageSource;
 		this.requestBeanValidator = requestBeanValidator;
@@ -80,14 +82,15 @@ public class MomentsResource {
 		Content content = new Content();
 		Moment moment = new Moment();
 
+		List<FileMetadataResponse> fileMetadataResponses = null;
 		// Check total files if over limit
 		if (files != null) {
 			int size = files.size();
-			if (size > appProperties.getMaxFilesPerUpload()) {
+			if (size > configService.getMaxFilesPerUpload()) {
 				logger.warn("Detected uploaded files: {} over limit, user id: {}", size, userId);
 				throw new UploadedFilesOverLimitException(messageSource.getMessage(
 						"bufanbaby.uploaded.files.over.limit",
-						new Integer[] { appProperties.getMaxFilesPerUpload() },
+						new Integer[] { configService.getMaxFilesPerUpload() },
 						LocaleContextHolder.getLocale()));
 			}
 
@@ -107,21 +110,22 @@ public class MomentsResource {
 
 			// Save uploaded file
 			List<FileMetadata> fileMetadatas = new ArrayList<FileMetadata>(size);
+			fileMetadataResponses = new ArrayList<FileMetadataResponse>(size);
 			for (FormDataBodyPart formDataBodyPart : files) {
 				ContentDisposition disposition = formDataBodyPart.getContentDisposition();
 				MediaType mediaType = formDataBodyPart.getMediaType();
-				long maxBytesPerUploadedFile = appProperties.getMaxBytesPerMediaType(mediaType);
+				long maxBytesPerUploadedFile = configService.getMaxBytesPerMediaType(mediaType);
 
 				// save the file
 				// D:/moments/images/{userId}/2015/05/20
-				String parentDir = appProperties.getParentDirectory(mediaType, userId);
+				String parentDir = configService.getParentDirectory(mediaType, userId);
 				createParentDirectories(parentDir);
 
 				// D:/moments/images/{userId}/2015/05/20/{currentmillis}.gif
-				String destPath = appProperties.getUploadedFileDestPath(mediaType, parentDir);
+				String destPath = configService.getUploadedFileDestPath(mediaType, parentDir);
 				saveUploadedFile(formDataBodyPart, maxBytesPerUploadedFile, destPath);
 
-				String relativePath = appProperties.getRelativeDirectory(mediaType, destPath);
+				String relativePath = configService.getRelativeDirectory(mediaType, destPath);
 
 				// create file metadata
 				FileMetadata fileMetadata = new FileMetadata();
@@ -131,6 +135,8 @@ public class MomentsResource {
 				// TODO: xx_100*100 if >1 or 150X150 if = 1
 				fileMetadata.setThumbnailFilePath("TODO");
 				fileMetadatas.add(fileMetadata);
+
+				fileMetadataResponses.add(fileMetadata.toFileMetadataResponse(uriInfo));
 			}
 
 			moment.setFileMetadatas(fileMetadatas);
@@ -164,10 +170,29 @@ public class MomentsResource {
 
 		PostMomentResponse response = new PostMomentResponse();
 		response.setMomentId(momentId);
-		response.setFileMetadatas(moment.getFileMetadatas());
+		response.setFileMetadatas(fileMetadataResponses);
 		response.setSelf(location);
 
 		return Response.created(location).entity(response).build();
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getMoments(
+			@Context UriInfo uriInfo,
+			@PathParam("userId") long userId,
+			@QueryParam("from") int from,
+			@QueryParam("size") int size) {
+
+		if (size == 0) {
+			size = configService.getMaxMomentsPerRequest();
+		}
+
+		if (from == 0) {
+			return Response.ok().entity(momentService.findLatestMoments(userId, size)).build();
+		} else {
+			return null;
+		}
 	}
 
 	/**

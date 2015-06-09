@@ -3,15 +3,13 @@ package com.bufanbaby.backend.rest.resources.moment;
 import java.net.URI;
 import java.util.List;
 
-import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
-
 public class PostMomentResponse {
 
 	private long momentId;
 
 	private URI self;
 
-	private List<FileMetadata> fileMetadatas;
+	private List<FileMetadataResponse> fileMetadatas;
 
 	public long getMomentId() {
 		return momentId;
@@ -29,11 +27,11 @@ public class PostMomentResponse {
 		this.self = self;
 	}
 
-	public List<FileMetadata> getFileMetadatas() {
+	public List<FileMetadataResponse> getFileMetadatas() {
 		return fileMetadatas;
 	}
 
-	public void setFileMetadatas(List<FileMetadata> fileMetadatas) {
+	public void setFileMetadatas(List<FileMetadataResponse> fileMetadatas) {
 		this.fileMetadatas = fileMetadatas;
 	}
 

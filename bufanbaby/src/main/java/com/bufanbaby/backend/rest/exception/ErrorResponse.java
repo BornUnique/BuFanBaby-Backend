@@ -40,14 +40,11 @@ public class ErrorResponse {
 	}
 
 	public static enum ErrorCode {
-		REQUEST_VALIDATION_ERROR("BB400",
+		REQUEST_VALIDATION_ERROR("BB4000",
 				"The data passed in the request was invalid. Please check and resubmit."),
 
-		UNSUPPORTED_FILE_TYPE("BB4015",
-				"The uploaded file media type is not supported. Please check and resubmit."),
-
-		FILE_SIZE_OVER_LIMIT("BB4013",
-				"The uploaded file size is too large. Please check and resubmit."),
+		UNAUTHORIZED("BB4001",
+				"You do not have the appropriate privileges to access this resource."),
 
 		UPLOADED_FILES_OVER_LIMIT("BB4003",
 				"The total uploaded Files is too much. Please check and resubmit."),
@@ -55,6 +52,12 @@ public class ErrorResponse {
 		USER_NOT_FOUND("BB4004", "No user can be found for that ID."),
 
 		USER_ALREADY_EXISTS("BB4009", "An attempt was made to create a user that already exists."),
+
+		FILE_SIZE_OVER_LIMIT("BB4013",
+				"The uploaded file size is too large. Please check and resubmit."),
+
+		UNSUPPORTED_FILE_TYPE("BB4015",
+				"The uploaded file media type is not supported. Please check and resubmit."),
 
 		INTERNAL_SERVER_FAILURE("BB5001", "Internal Server Failure"),
 

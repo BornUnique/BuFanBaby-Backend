@@ -1,5 +1,12 @@
 package com.bufanbaby.backend.rest.domain.moment;
 
+import java.net.URI;
+
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+
+import com.bufanbaby.backend.rest.resources.moment.FileMetadataResponse;
+
 public class FileMetadata {
 
 	/**
@@ -40,6 +47,29 @@ public class FileMetadata {
 
 	public void setThumbnailFilePath(String thumbnailFilePath) {
 		this.thumbnailFilePath = thumbnailFilePath;
+	}
+
+	public FileMetadataResponse toFileMetadataResponse(UriInfo uriInfo) {
+		URI uri = uriInfo.getBaseUri();
+		String host = uri.getHost();
+		String schema = uri.getScheme();
+		int port = uri.getPort();
+
+		URI root = null;
+		if (port == -1) {
+			root = URI.create(schema + "://" + host);
+		} else {
+			root = URI.create(schema + "://" + host + ":" + port);
+		}
+
+		UriBuilder builder = UriBuilder.fromUri(root);
+
+		FileMetadataResponse response = new FileMetadataResponse();
+		response.setFileName(originalName);
+		response.setFileUri(builder.path(originalFilePath).build());
+		response.setThumbnailUrl(builder.path(thumbnailFilePath).build());
+		return response;
+
 	}
 
 	@Override

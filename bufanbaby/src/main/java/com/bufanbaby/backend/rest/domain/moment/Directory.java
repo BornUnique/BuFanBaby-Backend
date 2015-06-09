@@ -1,4 +1,4 @@
-package com.bufanbaby.backend.rest.config;
+package com.bufanbaby.backend.rest.domain.moment;
 
 public enum Directory {
 
