@@ -34,10 +34,11 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
+import com.bufanbaby.backend.rest.domain.moment.Moment;
 import com.bufanbaby.backend.rest.domain.moment.ShareWith;
 import com.bufanbaby.backend.rest.exception.ErrorResponse;
 import com.bufanbaby.backend.rest.exception.ValidationErrorResponse;
+import com.bufanbaby.backend.rest.resources.moment.FileMetadataResponse;
 import com.bufanbaby.backend.rest.resources.moment.PostMomentRequest;
 import com.bufanbaby.backend.rest.resources.moment.PostMomentResponse;
 
@@ -80,10 +81,8 @@ public class MomentRestApiTest {
 	public void testPostAndGetMoment() throws URISyntaxException {
 		FormDataMultiPart multipart = setupFormDataMultipart(false, false);
 
-		Response postResponse = momentTarget.request()
-				// .header("Accept-Language",
-				// "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4")
-				.post(Entity.entity(multipart, multipart.getMediaType()));
+		Response postResponse = momentTarget.request().post(
+				Entity.entity(multipart, multipart.getMediaType()));
 
 		// check http status code
 		assertThat(postResponse.getStatusInfo().getFamily(),
@@ -94,19 +93,21 @@ public class MomentRestApiTest {
 		assertThat(postResponse.getLocation(), is(notNullValue()));
 
 		PostMomentResponse momentResponse = postResponse.readEntity(PostMomentResponse.class);
-
 		assertThat(momentResponse.getSelf(), equalTo(postResponse.getLocation()));
 
-		List<FileMetadata> fileMetadatas = momentResponse.getFileMetadatas();
-		for (FileMetadata fileMetadata : fileMetadatas) {
-			assertThat(fileMetadata.getOriginalName(),
+		List<FileMetadataResponse> fileMetadatas = momentResponse.getFileMetadatas();
+		for (FileMetadataResponse fileMetadataResponse : fileMetadatas) {
+			assertThat(fileMetadataResponse.getFileName(),
 					is(anyOf(equalTo(Footprint_Image_Name), equalTo(Smile_Image_Name))));
 		}
 
 		// momentTarget.queryParam(name, values);
 
 		Response getResponse = momentTarget.request().get();
-		System.out.println(getResponse.readEntity(List.class));
+
+		@SuppressWarnings("unchecked")
+		List<Moment> moments = getResponse.readEntity(List.class);
+		assertThat(moments.size(), equalTo(1));
 	}
 
 	@Test

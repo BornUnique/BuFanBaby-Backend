@@ -82,6 +82,7 @@ public class MomentsResource {
 		Content content = new Content();
 		Moment moment = new Moment();
 
+		List<FileMetadataResponse> fileMetadataResponses = null;
 		// Check total files if over limit
 		if (files != null) {
 			int size = files.size();
@@ -109,6 +110,7 @@ public class MomentsResource {
 
 			// Save uploaded file
 			List<FileMetadata> fileMetadatas = new ArrayList<FileMetadata>(size);
+			fileMetadataResponses = new ArrayList<FileMetadataResponse>(size);
 			for (FormDataBodyPart formDataBodyPart : files) {
 				ContentDisposition disposition = formDataBodyPart.getContentDisposition();
 				MediaType mediaType = formDataBodyPart.getMediaType();
@@ -133,6 +135,8 @@ public class MomentsResource {
 				// TODO: xx_100*100 if >1 or 150X150 if = 1
 				fileMetadata.setThumbnailFilePath("TODO");
 				fileMetadatas.add(fileMetadata);
+
+				fileMetadataResponses.add(fileMetadata.toFileMetadataResponse(uriInfo));
 			}
 
 			moment.setFileMetadatas(fileMetadatas);
@@ -166,7 +170,7 @@ public class MomentsResource {
 
 		PostMomentResponse response = new PostMomentResponse();
 		response.setMomentId(momentId);
-		response.setFileMetadatas(moment.getFileMetadatas());
+		response.setFileMetadatas(fileMetadataResponses);
 		response.setSelf(location);
 
 		return Response.created(location).entity(response).build();
