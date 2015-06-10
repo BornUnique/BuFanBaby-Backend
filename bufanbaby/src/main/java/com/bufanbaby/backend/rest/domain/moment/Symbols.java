@@ -1,7 +1,7 @@
 package com.bufanbaby.backend.rest.domain.moment;
 
 public enum Symbols {
-	FORWARD_SLASH('/');
+	FORWARD_SLASH('/'), DOT('.');
 
 	public final char symbol;
 
