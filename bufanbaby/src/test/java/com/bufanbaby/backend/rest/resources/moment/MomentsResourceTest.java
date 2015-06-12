@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
+import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
@@ -54,6 +55,9 @@ public class MomentsResourceTest {
 	private UserAgentStringParser userAgentStringParser;
 
 	@Mock
+	private AsyncResponse asyncResponse;
+
+	@Mock
 	private UriInfo uriInfo;
 
 	@Mock
@@ -88,7 +92,7 @@ public class MomentsResourceTest {
 		int userId = new Random().nextInt(31);
 
 		thrown.expect(UploadedFilesOverLimitException.class);
-		momentResource.postMoments(uriInfo, null, userId, momentRequest, files);
+		momentResource.postMoments(asyncResponse, uriInfo, null, userId, momentRequest, files);
 	}
 
 	@Test
@@ -106,7 +110,7 @@ public class MomentsResourceTest {
 		int userId = new Random().nextInt(31);
 
 		thrown.expect(UnsupportedFileTypeException.class);
-		momentResource.postMoments(uriInfo, null, userId, momentRequest, files);
+		momentResource.postMoments(asyncResponse, uriInfo, null, userId, momentRequest, files);
 	}
 
 	private PostMomentRequest setupPostMomentRequest() {

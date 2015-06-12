@@ -31,7 +31,7 @@ public class ResourcesConfiguration extends ResourceConfig {
 
 		register(RequestContextFilter.class);
 
-		register(new LoggingFilter(logger, true));
+		register(new LoggingFilter(logger, false));
 
 		register(JacksonFeature.class);
 

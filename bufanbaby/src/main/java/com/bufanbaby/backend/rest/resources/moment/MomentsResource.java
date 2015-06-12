@@ -1,5 +1,6 @@
 package com.bufanbaby.backend.rest.resources.moment;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -8,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -16,6 +18,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,6 +31,8 @@ import net.sf.uadetector.UserAgentStringParser;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.server.ManagedAsync;
+import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +44,7 @@ import com.bufanbaby.backend.rest.domain.moment.FileMetadata;
 import com.bufanbaby.backend.rest.domain.moment.MediaTypes;
 import com.bufanbaby.backend.rest.domain.moment.Moment;
 import com.bufanbaby.backend.rest.domain.moment.ShareWith;
+import com.bufanbaby.backend.rest.domain.moment.Symbols;
 import com.bufanbaby.backend.rest.exception.FileIOException;
 import com.bufanbaby.backend.rest.exception.UnsupportedFileTypeException;
 import com.bufanbaby.backend.rest.exception.UploadedFilesOverLimitException;
@@ -67,15 +74,23 @@ public class MomentsResource {
 	}
 
 	@POST
+	@ManagedAsync
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postMoments(
+	public void postMoments(
+			@Suspended AsyncResponse asyncResponse,
 			@Context UriInfo uriInfo,
 			@HeaderParam("user-agent") String userAgent,
 			@PathParam("userId") long userId,
 			@FormDataParam("moment") PostMomentRequest request,
 			@FormDataParam("files") List<FormDataBodyPart> files) {
 
+		Response response = saveMoment(uriInfo, userAgent, userId, request, files);
+		asyncResponse.resume(response);
+	}
+
+	private Response saveMoment(UriInfo uriInfo, String userAgent, long userId,
+			PostMomentRequest request, List<FormDataBodyPart> files) {
 		// validate request parameters
 		requestBeanValidator.validate(request);
 
@@ -121,19 +136,37 @@ public class MomentsResource {
 				String parentDir = configService.getParentDirectory(mediaType, userId);
 				createParentDirectories(parentDir);
 
-				// D:/moments/images/{userId}/2015/05/20/{currentmillis}.gif
+				// D:/moments/images/{userId}/2015/05/20/{}.gif
 				String destPath = configService.getUploadedFileDestPath(mediaType, parentDir);
 				saveUploadedFile(formDataBodyPart, maxBytesPerUploadedFile, destPath);
 
-				String relativePath = configService.getRelativeDirectory(mediaType, destPath);
+				String thumbnailFilePath = null;
+				try {
+					BufferedImage img = ImageIO.read(Paths.get(destPath).toFile());
+					BufferedImage thumbnail = Scalr.resize(img, 100);
+
+					String extension = com.google.common.io.Files.getFileExtension(destPath);
+					String name = com.google.common.io.Files.getNameWithoutExtension(destPath)
+							+ "_100x100";
+
+					thumbnailFilePath = parentDir + Symbols.FORWARD_SLASH.symbol + name
+							+ Symbols.DOT.symbol + extension;
+					ImageIO.write(thumbnail, extension, Paths.get(thumbnailFilePath).toFile());
+				} catch (IOException e) {
+					logger.error("Error when resizing file: " + destPath, e);
+					throw new FileIOException(messageSource.getMessage(
+							"bufanbaby.file.save.failure", null, LocaleContextHolder.getLocale()));
+				}
+
+				String originalPath = configService.getRelativeDirectory(mediaType, destPath);
+				String thumbnailPath = configService.getRelativeDirectory(mediaType,
+						thumbnailFilePath);
 
 				// create file metadata
 				FileMetadata fileMetadata = new FileMetadata();
 				fileMetadata.setOriginalName(disposition.getFileName());
-				fileMetadata.setOriginalFilePath(relativePath);
-
-				// TODO: xx_100*100 if >1 or 150X150 if = 1
-				fileMetadata.setThumbnailFilePath("TODO");
+				fileMetadata.setOriginalFilePath(originalPath);
+				fileMetadata.setThumbnailFilePath(thumbnailPath);
 				fileMetadatas.add(fileMetadata);
 
 				fileMetadataResponses.add(fileMetadata.toFileMetadataResponse(uriInfo));
@@ -168,12 +201,12 @@ public class MomentsResource {
 		// Return response based on Post semantic
 		URI location = uriInfo.getAbsolutePathBuilder().path(String.valueOf(momentId)).build();
 
-		PostMomentResponse response = new PostMomentResponse();
-		response.setMomentId(momentId);
-		response.setFileMetadatas(fileMetadataResponses);
-		response.setSelf(location);
+		PostMomentResponse postMomentResponse = new PostMomentResponse();
+		postMomentResponse.setMomentId(momentId);
+		postMomentResponse.setFileMetadatas(fileMetadataResponses);
+		postMomentResponse.setSelf(location);
 
-		return Response.created(location).entity(response).build();
+		return Response.created(location).entity(postMomentResponse).build();
 	}
 
 	@GET
